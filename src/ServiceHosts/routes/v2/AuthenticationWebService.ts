@@ -1,0 +1,443 @@
+import {
+  AccountCompletionResult, BuyingDurationType, ChannelType,
+  EmailAddressStatus, MemberAuthenticationResult, MemberView, MemberWalletView, PublicProfileView,
+} from '@/Cmune/DataCenter/Common/Entities';
+import {
+  AccountCompletionResultViewProxy, EnumProxy, Int32Proxy, MemberAuthenticationResultViewProxy, StringProxy,
+} from '@/UberStrike/Core/Serialization';
+import { MemberAuthenticationResultView } from '@/UberStrike/Core/ViewModel';
+import {
+  AccountCompletionResultView, PlayerPersonalRecordStatisticsView, PlayerStatisticsView, PlayerWeaponStatisticsView,
+} from '@/UberStrike/DataCenter/Common/Entities';
+import {
+  Clan, ClanMember, CurrencyDeposit, ItemTransaction, MemberWallet, ModerationAction, PlayerInventoryItem, PlayerLoadout, PlayerStatistics, PublicProfile, SteamMember,
+} from '@/models';
+import {
+  ApiVersion, Log, ModerationFlag, UberstrikeInventoryItem,
+} from '@/utils';
+import crypto from 'crypto';
+import BaseWebService from './BaseWebService';
+
+export default class AuthenticationWebService extends BaseWebService {
+  public static get ServiceName(): string { return 'AuthenticationWebService'; }
+
+  public static get ServiceVersion(): string { return ApiVersion.Current; }
+
+  protected static get ServiceInterface(): string { return 'IAuthenticationWebServiceContract'; }
+
+  static async CompleteAccount(bytes: byte[], outputStream: byte[]) {
+    try {
+      const cmid = Int32Proxy.Deserialize(bytes);
+      const name = StringProxy.Deserialize(bytes);
+      const channel = EnumProxy.Deserialize<ChannelType>(bytes);
+      const locale = StringProxy.Deserialize(bytes);
+      const machineId = StringProxy.Deserialize(bytes);
+
+      this.debugEndpoint('CompleteAccount', cmid, name, channel, locale, machineId);
+
+      const publicProfile = await PublicProfile.findOne({ where: { Cmid: cmid } });
+
+      if (!publicProfile) {
+        AccountCompletionResultViewProxy.Serialize(outputStream, new AccountCompletionResultView({
+          Result: AccountCompletionResult.InvalidData,
+        }));
+      } else if (publicProfile.Name.trim().length) {
+        AccountCompletionResultViewProxy.Serialize(outputStream, new AccountCompletionResultView({
+          Result: AccountCompletionResult.AlreadyCompletedAccount,
+        }));
+      } else if ((await PublicProfile.findOne({ where: { Name: name } })) != null) {
+        AccountCompletionResultViewProxy.Serialize(outputStream, new AccountCompletionResultView({
+          Result: AccountCompletionResult.DuplicateName,
+        }));
+      } else if (name.length < 3 || !name.match(/^[a-zA-Z0-9_]+$/)) {
+        AccountCompletionResultViewProxy.Serialize(outputStream, new AccountCompletionResultView({
+          Result: AccountCompletionResult.InvalidName,
+        }));
+      } else if (/* ProfanityFilter.DetectAllProfanities(name).Count > 0 */ false) {
+        AccountCompletionResultViewProxy.Serialize(outputStream, new AccountCompletionResultView({
+          Result: AccountCompletionResult.InvalidName,
+        }));
+      } else {
+        await publicProfile.update({
+          Name: name,
+        });
+
+        await PlayerInventoryItem.bulkCreate([
+          {
+            Cmid: cmid,
+            ItemId: UberstrikeInventoryItem.TheSplatbat,
+            AmountRemaining: -1,
+          },
+          {
+            Cmid: cmid,
+            ItemId: UberstrikeInventoryItem.MachineGun,
+            AmountRemaining: -1,
+          },
+          {
+            Cmid: cmid,
+            ItemId: UberstrikeInventoryItem.ShotGun,
+            AmountRemaining: -1,
+          },
+          {
+            Cmid: cmid,
+            ItemId: UberstrikeInventoryItem.SniperRifle,
+            AmountRemaining: -1,
+          },
+        ]);
+
+        await ItemTransaction.bulkCreate([
+          {
+            WithdrawalId: Math.randomInt(),
+            WithdrawalDate: new Date(),
+            Points: 0,
+            Credits: 0,
+            Cmid: publicProfile.Cmid,
+            ItemId: UberstrikeInventoryItem.TheSplatbat,
+            Duration: BuyingDurationType.Permanent,
+          },
+          {
+            WithdrawalId: Math.randomInt(),
+            WithdrawalDate: new Date(),
+            Points: 0,
+            Credits: 0,
+            Cmid: publicProfile.Cmid,
+            ItemId: UberstrikeInventoryItem.MachineGun,
+            Duration: BuyingDurationType.Permanent,
+          },
+          {
+            WithdrawalId: Math.randomInt(),
+            WithdrawalDate: new Date(),
+            Points: 0,
+            Credits: 0,
+            Cmid: publicProfile.Cmid,
+            ItemId: UberstrikeInventoryItem.SniperRifle,
+            Duration: BuyingDurationType.Permanent,
+          },
+          {
+            WithdrawalId: Math.randomInt(),
+            WithdrawalDate: new Date(),
+            Points: 0,
+            Credits: 0,
+            Cmid: publicProfile.Cmid,
+            ItemId: UberstrikeInventoryItem.ShotGun,
+            Duration: BuyingDurationType.Permanent,
+          },
+        ]);
+
+        PlayerLoadout.update({
+          MeleeWeapon: UberstrikeInventoryItem.TheSplatbat,
+          Weapon1: UberstrikeInventoryItem.MachineGun,
+        }, {
+          where: { Cmid: cmid },
+        });
+
+        AccountCompletionResultViewProxy.Serialize(outputStream, new AccountCompletionResultView({
+          Result: AccountCompletionResult.Ok,
+          ItemsAttributed: {
+            [UberstrikeInventoryItem.TheSplatbat]: 1,
+            [UberstrikeInventoryItem.MachineGun]: 1,
+            [UberstrikeInventoryItem.ShotGun]: 1,
+            [UberstrikeInventoryItem.SniperRifle]: 1,
+          },
+        }));
+      }
+    } catch (error) {
+      this.handleEndpointError('CompleteAccount', error);
+    }
+  }
+
+  static async CreateUser(bytes: byte[], outputStream: byte[]) {
+    try {
+      const emailAddress = StringProxy.Deserialize(bytes);
+      const password = StringProxy.Deserialize(bytes);
+      const channel = EnumProxy.Deserialize<ChannelType>(bytes);
+      const locale = StringProxy.Deserialize(bytes);
+      const machineId = StringProxy.Deserialize(bytes);
+
+      this.debugEndpoint('CreateUser', emailAddress, password, channel, locale, machineId);
+
+      throw new Error('Not Implemented');
+    } catch (error) {
+      this.handleEndpointError('CreateUser', error);
+    }
+  }
+
+  static async LinkSteamMember(bytes: byte[], outputStream: byte[]) {
+    try {
+      const email = StringProxy.Deserialize(bytes);
+      const password = StringProxy.Deserialize(bytes);
+      const steamId = StringProxy.Deserialize(bytes);
+      const machineId = StringProxy.Deserialize(bytes);
+
+      this.debugEndpoint('LinkSteamMember', email, password, steamId, machineId);
+
+      throw new Error('Not Implemented');
+    } catch (error) {
+      this.handleEndpointError('LinkSteamMember', error);
+    }
+  }
+
+  static async LoginMemberEmail(bytes: byte[], outputStream: byte[]) {
+    try {
+      const email = StringProxy.Deserialize(bytes);
+      const password = StringProxy.Deserialize(bytes);
+      const channel = EnumProxy.Deserialize<ChannelType>(bytes);
+      const machineId = StringProxy.Deserialize(bytes);
+
+      this.debugEndpoint('LoginMemberEmail', email, password, channel, machineId);
+
+      throw new Error('Not Implemented');
+    } catch (error) {
+      this.handleEndpointError('LoginMemberEmail', error);
+    }
+  }
+
+  static async LoginMemberFacebookUnitySdk(bytes: byte[], outputStream: byte[]) {
+    try {
+      const facebookPlayerAccessToken = StringProxy.Deserialize(bytes);
+      const channel = EnumProxy.Deserialize<ChannelType>(bytes);
+      const machineId = StringProxy.Deserialize(bytes);
+
+      this.debugEndpoint('LoginMemberFacebookUnitySdk', facebookPlayerAccessToken, channel, machineId);
+
+      throw new Error('Not Implemented');
+    } catch (error) {
+      this.handleEndpointError('LoginMemberFacebookUnitySdk', error);
+    }
+  }
+
+  static async LoginMemberPortal(bytes: byte[], outputStream: byte[]) {
+    try {
+      const cmid = Int32Proxy.Deserialize(bytes);
+      const hash = StringProxy.Deserialize(bytes);
+      const machineId = StringProxy.Deserialize(bytes);
+
+      this.debugEndpoint('LoginMemberPortal', cmid, hash, machineId);
+
+      throw new Error('Not Implemented');
+    } catch (error) {
+      this.handleEndpointError('LoginMemberPortal', error);
+    }
+  }
+
+  static async LoginSteam(bytes: byte[], outputStream: byte[]) {
+    try {
+      const steamId = StringProxy.Deserialize(bytes);
+      const authToken = StringProxy.Deserialize(bytes);
+      const machineId = StringProxy.Deserialize(bytes);
+
+      this.debugEndpoint('LoginSteam', steamId, authToken, machineId);
+
+      let steamMember = await SteamMember.findOne({ where: { SteamId: steamId } });
+
+      if (!steamMember) {
+        const Cmid = Math.randomInt();
+
+        const publicProfile = await PublicProfile.create({
+          Cmid,
+          Name: '',
+          LastLoginDate: new Date(),
+          EmailAddressStatus: EmailAddressStatus.Verified,
+        });
+
+        steamMember = await SteamMember.create({
+          SteamId: steamId,
+          Cmid,
+          AuthToken: authToken,
+          MachineId: machineId,
+        });
+
+        const memberWallet = await MemberWallet.create({
+          Cmid,
+          Points: 10000,
+          Credits: 1000,
+          PointsExpiration: new Date('9999-12-31T23:59:59.999Z'),
+          CreditsExpiration: new Date('9999-12-31T23:59:59.999Z'),
+        });
+
+        const transactionKey = crypto.randomBytes(32).toString('hex');
+
+        await CurrencyDeposit.create({
+          CreditsDepositId: Math.randomInt(),
+          BundleName: 'Signup Reward',
+          Cmid,
+          Credits: memberWallet.Credits,
+          CurrencyLabel: '$',
+          DepositDate: new Date(),
+          Points: memberWallet.Points,
+          TransactionKey: transactionKey,
+        });
+
+        const playerStatistics = await PlayerStatistics.create({
+          Cmid,
+          PersonalRecord: new PlayerPersonalRecordStatisticsView(),
+          WeaponStatistics: new PlayerWeaponStatisticsView(),
+        });
+
+        const session = await global.SessionManager.findOrCreateSessionForSteamUser(publicProfile as PublicProfileView, machineId, steamMember);
+
+        const memberAuth = new MemberAuthenticationResultView({
+          MemberAuthenticationResult: MemberAuthenticationResult.Ok,
+          MemberView: new MemberView({
+            PublicProfile: publicProfile.get({ plain: true }),
+            MemberWallet: {
+              ...memberWallet.get({ plain: true }),
+              Credits: Math.max(memberWallet.Credits, 0),
+              Points: Math.max(memberWallet.Points, 0),
+            },
+          }),
+          PlayerStatisticsView: playerStatistics,
+          ServerTime: new Date(),
+          IsAccountComplete: false,
+          AuthToken: session.SessionId,
+        });
+
+        MemberAuthenticationResultViewProxy.Serialize(outputStream, memberAuth);
+      } else {
+        const bannedMember = await ModerationAction.findOne({
+          where: {
+            ModerationFlag: ModerationFlag.Banned,
+            TargetCmid: steamMember.Cmid,
+          },
+        });
+
+        if (bannedMember && (!bannedMember.ExpireTime || bannedMember.ExpireTime > new Date())) {
+          MemberAuthenticationResultViewProxy.Serialize(outputStream, new MemberAuthenticationResultView({
+            MemberAuthenticationResult: MemberAuthenticationResult.IsBanned,
+          }));
+        } else {
+          const publicProfile = await PublicProfile.findOne({ where: { Cmid: steamMember.Cmid } });
+
+          if (!publicProfile) {
+            MemberAuthenticationResultViewProxy.Serialize(outputStream, new MemberAuthenticationResultView({
+              MemberAuthenticationResult: MemberAuthenticationResult.UnknownError,
+            }));
+          } else {
+            const memberWallet = await MemberWallet.findOne({ where: { Cmid: steamMember.Cmid } });
+            const playerStatistics = await MemberWallet.findOne({ where: { Cmid: steamMember.Cmid } });
+
+            const session = await global.SessionManager.findOrCreateSessionForSteamUser(publicProfile as PublicProfileView, machineId, steamMember);
+
+            let clan;
+            if (publicProfile.Name.trim().length > 0) {
+              clan = await Clan.findOne({
+                include: [{
+                  model: ClanMember,
+                  as: 'Members',
+                }],
+              });
+
+              if (clan) {
+                const clanMember = clan.Members.find((_) => _.Cmid === steamMember!.Cmid);
+
+                if (clanMember) {
+                  ClanMember.update({
+                    Lastlogin: new Date(),
+                  }, {
+                    where: {
+                      GroupId: clan.GroupId,
+                      Cmid: clanMember.Cmid,
+                    },
+                  });
+                }
+              }
+
+              Log.info(`${publicProfile.Name}(${publicProfile.Cmid}) logged in.`);
+            }
+
+            MemberAuthenticationResultViewProxy.Serialize(outputStream, new MemberAuthenticationResultView({
+              MemberAuthenticationResult: MemberAuthenticationResult.Ok,
+              MemberView: new MemberView({
+                PublicProfile: new PublicProfileView({ ...publicProfile.get({ plain: true }) }),
+                MemberWallet: new MemberWalletView({ ...memberWallet!.get({ plain: true }) }),
+              }),
+              PlayerStatisticsView: new PlayerStatisticsView({ ...playerStatistics!.get({ plain: true }) }),
+              IsAccountComplete: publicProfile.Name.trim().length > 0,
+              AuthToken: session.SessionId,
+            }));
+          }
+        }
+      }
+    } catch (error) {
+      this.handleEndpointError('LoginSteam', error);
+    }
+  }
+
+  static async VerifyAuthToken(bytes: byte[], outputStream: byte[]) {
+    try {
+      const authToken = StringProxy.Deserialize(bytes);
+
+      this.debugEndpoint('VerifyAuthToken', authToken);
+
+      const session = await global.SessionManager.findSessionForSteamUser(authToken);
+      if (!session) {
+        MemberAuthenticationResultViewProxy.Serialize(outputStream, new MemberAuthenticationResultView({
+          MemberAuthenticationResult: MemberAuthenticationResult.InvalidCookie,
+        }));
+      } else {
+        const steamMember = await session.SteamMember;
+
+        if (!steamMember) {
+          MemberAuthenticationResultViewProxy.Serialize(outputStream, new MemberAuthenticationResultView({
+            MemberAuthenticationResult: MemberAuthenticationResult.UnknownError,
+          }));
+        } else {
+          const bannedMember = await ModerationAction.findOne({
+            where: {
+              ModerationFlag: ModerationFlag.Banned,
+              TargetCmid: steamMember.Cmid,
+            },
+          });
+
+          if (bannedMember && (!bannedMember.ExpireTime || bannedMember.ExpireTime > new Date())) {
+            MemberAuthenticationResultViewProxy.Serialize(outputStream, new MemberAuthenticationResultView({
+              MemberAuthenticationResult: MemberAuthenticationResult.IsBanned,
+            }));
+          } else {
+            const publicProfile = await PublicProfile.findOne({ where: { Cmid: steamMember.Cmid } });
+
+            if (!publicProfile) {
+              MemberAuthenticationResultViewProxy.Serialize(outputStream, new MemberAuthenticationResultView({
+                MemberAuthenticationResult: MemberAuthenticationResult.UnknownError,
+              }));
+            } else {
+              const memberWallet = await MemberWallet.findOne({ where: { Cmid: steamMember.Cmid } });
+              const playerStatistics = await MemberWallet.findOne({ where: { Cmid: steamMember.Cmid } });
+
+              MemberAuthenticationResultViewProxy.Serialize(outputStream, new MemberAuthenticationResultView({
+                MemberAuthenticationResult: MemberAuthenticationResult.Ok,
+                MemberView: new MemberView({
+                  PublicProfile: new PublicProfileView({ ...publicProfile.get({ plain: true }) }),
+                  MemberWallet: new MemberWalletView({ ...memberWallet!.get({ plain: true }) }),
+                }),
+                PlayerStatisticsView: new PlayerStatisticsView({ ...playerStatistics!.get({ plain: true }) }),
+                ServerTime: new Date(),
+                IsAccountComplete: publicProfile.Name.trim().length > 0,
+                AuthToken: session.SessionId,
+              }));
+
+              if (publicProfile.Name.trim().length > 0) {
+                const clan = await Clan.findOne({
+                  include: [{
+                    model: ClanMember,
+                    as: 'Members',
+                  }],
+                });
+
+                if (clan) {
+                  const clanMember = clan.Members.find((_) => _.Cmid === steamMember.Cmid);
+                  clanMember?.update({
+                    GroupId: clan.GroupId,
+                    Lastlogin: new Date(),
+                  });
+                }
+              }
+            }
+          }
+        }
+      }
+    } catch (error) {
+      this.handleEndpointError('VerifyAuthToken', error);
+    }
+  }
+}

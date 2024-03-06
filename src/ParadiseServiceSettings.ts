@@ -1,0 +1,48 @@
+import { Log } from '@/utils';
+import fs from 'fs';
+import path from 'path';
+import YAML from 'yaml';
+
+export class ServerPassPhrase {
+  public Id: string;
+  public PassPhrase: string;
+}
+
+export class ParadiseServiceSettings {
+  public Hostname: string = '127.0.0.1';
+
+  public WebServicePort: number = 8080;
+  public FileServerPort: number = 8081;
+  public SocketPort: number = 8082;
+
+  public DatabaseServer: string;
+  public DatabaseType: string = 'mysql';
+  public DatabasePort: number = 3306;
+  public DatabaseUser: string;
+  public DatabasePassword: string;
+  public DatabaseName: string = 'paradise';
+
+  public WebServicePrefix: string = 'UberStrike.DataCenter.WebService.CWS.';
+  public WebServiceSuffix: string = 'Contract.svc';
+  public EncryptionInitVector: string = 'aaaaBBBBccccDDDD'; // Must be 16 characters
+  public EncryptionPassPhrase: string = 'mysupersecretpassphrase';
+  public ServerPassPhrases: ServerPassPhrase[] = [];
+
+  public FileServerRoot: string = 'wwwroot';
+
+  constructor(path: string) {
+    try {
+      const settings = YAML.parse(fs.readFileSync(path, 'utf-8'));
+
+      for (const key of Object.keys(settings)) {
+        if (key in this) {
+          this[key] = settings[key];
+        }
+      }
+    } catch (error: any) {
+      Log.error('There was an error parsing the settings file.', error);
+    }
+  }
+}
+
+export default new ParadiseServiceSettings(path.join(process.cwd(), 'Paradise.Settings.WebServices.yml'));
