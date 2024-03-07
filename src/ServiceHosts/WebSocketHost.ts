@@ -21,11 +21,7 @@ class SocketInfo {
   public IsClient: boolean;
 
   constructor(params: any = {}) {
-    for (const key of Object.keys(params)) {
-      if (key in this) {
-        this[key] = params[key];
-      }
-    }
+    Object.keys(params).filter((key) => key in this).forEach((key) => { this[key] = params[key]; });
   }
 }
 
@@ -35,11 +31,7 @@ class SocketConnectionStatus {
   public DisconnectReason: string;
 
   constructor(params: any = {}) {
-    for (const key of Object.keys(params)) {
-      if (key in this) {
-        this[key] = params[key];
-      }
-    }
+    Object.keys(params).filter((key) => key in this).forEach((key) => { this[key] = params[key]; });
   }
 }
 
@@ -149,11 +141,7 @@ export class WebSocketPayload {
   }
 
   constructor(params: any = {}) {
-    for (const key of Object.keys(params)) {
-      if (key in this) {
-        this[key] = params[key];
-      }
-    }
+    Object.keys(params).filter((key) => key in this).forEach((key) => { this[key] = params[key]; });
   }
 
   public static Encode(type: PacketType, data: any, crypto: RijndaelCryptoProvider | null, oneWay: boolean = false, conversationId: string | null = null, serverType: ServerType = ServerType.None): [byte[] | null, WebSocketPayload | null] {
@@ -251,11 +239,7 @@ export class WebSocketConnection {
   private receiveTask?: Promise<void>;
 
   constructor(params: any = {}) {
-    for (const key of Object.keys(params)) {
-      if (key in this) {
-        this[key] = params[key];
-      }
-    }
+    Object.keys(params).filter((key) => key in this).forEach((key) => { this[key] = params[key]; });
 
     // if (this.Socket) {
     //   this.Socket.on('message', (data) => {

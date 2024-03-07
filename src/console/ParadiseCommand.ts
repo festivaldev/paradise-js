@@ -6,11 +6,7 @@ export class CommandOutputArgs {
   public Inline: boolean = false;
 
   constructor(params: any = {}) {
-    for (const key of Object.keys(params)) {
-      if (key in this) {
-        this[key] = params[key];
-      }
-    }
+    Object.keys(params).filter((key) => key in this).forEach((key) => { this[key] = params[key]; });
   }
 }
 
