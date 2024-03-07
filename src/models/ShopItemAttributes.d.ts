@@ -1,4 +1,4 @@
-import { ItemShopHighlightType, UberstrikeItemClass } from '@/UberStrike/Core/Types';
+import { ItemShopHighlightType, UberstrikeItemClass } from '@festivaldev/uberstrike-js/UberStrike/Core/Types';
 
 export interface ShopItemAttributes {
   ID?: number;

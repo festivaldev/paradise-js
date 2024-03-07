@@ -1,4 +1,4 @@
-import { GameModeType } from '@/UberStrike/Core/Types';
+import { GameModeType } from '@festivaldev/uberstrike-js/UberStrike/Core/Types';
 import { DataTypes, Model, type Sequelize } from 'sequelize';
 
 export interface MapSettingsAttributes {

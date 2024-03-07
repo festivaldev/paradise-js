@@ -1,4 +1,4 @@
-import { BundleCategoryType } from '@/Cmune/DataCenter/Common/Entities';
+import { BundleCategoryType } from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
 import { DataTypes, Model, type Sequelize } from 'sequelize';
 import { ShopBundleItem } from '.';
 

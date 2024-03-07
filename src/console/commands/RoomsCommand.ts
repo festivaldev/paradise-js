@@ -1,4 +1,4 @@
-import { MemberAccessLevel } from '@/Cmune/DataCenter/Common/Entities';
+import { MemberAccessLevel } from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
 import ParadiseCommand from '../ParadiseCommand';
 
 export default class RoomsCommand extends ParadiseCommand {

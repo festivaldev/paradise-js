@@ -1,10 +1,10 @@
 import {
   ClanCreationReturnView,
   ClanRequestAcceptView, ClanRequestDeclineView, ClanView, ContactRequestStatus, GroupInvitationView, GroupPosition, GroupType, MemberAccessLevel,
-} from '@/Cmune/DataCenter/Common/Entities';
+} from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
 import {
   ClanCreationReturnViewProxy, ClanRequestAcceptViewProxy, ClanRequestDeclineViewProxy, ClanViewProxy, GroupCreationViewProxy, GroupInvitationViewProxy, Int32Proxy, ListProxy, MemberPositionUpdateViewProxy, StringProxy,
-} from '@/UberStrike/Core/Serialization';
+} from '@festivaldev/uberstrike-js/UberStrike/Core/Serialization';
 import {
   Clan, ClanMember, ContactRequest, GroupInvitation, PlayerInventoryItem, PlayerStatistics, PublicProfile,
 } from '@/models';

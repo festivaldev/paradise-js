@@ -1,12 +1,12 @@
 import {
   BundleCategoryType, BundleView, BuyItemResult, BuyingDurationType, BuyingLocationType, BuyingRecommendationType, ChannelType, PackType, PaymentProviderType, UberStrikeCurrencyType,
-} from '@/Cmune/DataCenter/Common/Entities';
-import { UberStrikeItemShopClientView } from '@/UberStrike/Core/Models/Views';
+} from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
+import { UberStrikeItemShopClientView } from '@festivaldev/uberstrike-js/UberStrike/Core/Models/Views';
 import {
   BooleanProxy,
   BundleViewProxy, EnumProxy, Int32Proxy, ListProxy, StringProxy, UberStrikeItemShopClientViewProxy,
-} from '@/UberStrike/Core/Serialization';
-import { UberstrikeItemType } from '@/UberStrike/Core/Types';
+} from '@festivaldev/uberstrike-js/UberStrike/Core/Serialization';
+import { UberstrikeItemType } from '@festivaldev/uberstrike-js/UberStrike/Core/Types';
 import {
   CurrencyDeposit, ItemTransaction, MemberWallet, PlayerInventoryItem, PlayerStatistics, PublicProfile, ShopBundle, ShopBundleItem, ShopFunctionalItem, ShopGearItem, ShopItemPrice, ShopQuickItem, ShopWeaponItem,
 } from '@/models';

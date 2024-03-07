@@ -1,4 +1,4 @@
-import { BuyingDurationType } from '@/Cmune/DataCenter/Common/Entities';
+import { BuyingDurationType } from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
 import { UberstrikeInventoryItem } from '@/utils';
 import { DataTypes, Model, type Sequelize } from 'sequelize';
 

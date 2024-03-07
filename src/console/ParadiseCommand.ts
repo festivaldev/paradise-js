@@ -1,4 +1,4 @@
-import { MemberAccessLevel } from '@/Cmune/DataCenter/Common/Entities';
+import { MemberAccessLevel } from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
 
 export class CommandOutputArgs {
   public InvocationId: string;

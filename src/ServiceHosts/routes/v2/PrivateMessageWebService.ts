@@ -1,7 +1,7 @@
-import { MessageThreadView, PrivateMessageView } from '@/Cmune/DataCenter/Common/Entities';
+import { MessageThreadView, PrivateMessageView } from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
 import {
   BooleanProxy, Int32Proxy, ListProxy, MessageThreadViewProxy, PrivateMessageViewProxy, StringProxy,
-} from '@/UberStrike/Core/Serialization';
+} from '@festivaldev/uberstrike-js/UberStrike/Core/Serialization';
 import { PrivateMessage, PublicProfile } from '@/models';
 import { ApiVersion } from '@/utils';
 import { Op } from 'sequelize';

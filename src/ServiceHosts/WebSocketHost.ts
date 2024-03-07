@@ -1,5 +1,7 @@
 import ParadiseServiceSettings from '@/ParadiseServiceSettings';
-import { ArrayProxy, ByteProxy, EnumProxy, Int32Proxy, StringProxy } from '@/UberStrike/Core/Serialization';
+import {
+  ArrayProxy, ByteProxy, EnumProxy, Int32Proxy, StringProxy,
+} from '@festivaldev/uberstrike-js/UberStrike/Core/Serialization';
 import { Log } from '@/utils';
 import crypto from 'crypto';
 import { EventEmitter } from 'stream';

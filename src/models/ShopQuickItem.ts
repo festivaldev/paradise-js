@@ -1,4 +1,4 @@
-import { ItemShopHighlightType, UberstrikeItemClass } from '@/UberStrike/Core/Types';
+import { ItemShopHighlightType, UberstrikeItemClass } from '@festivaldev/uberstrike-js/UberStrike/Core/Types';
 import { DataTypes, Model, type Sequelize } from 'sequelize';
 import { ShopItemAttributes } from './ShopItemAttributes';
 import ShopItemPrice from './ShopItemPrice';

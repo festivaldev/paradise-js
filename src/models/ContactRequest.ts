@@ -1,4 +1,4 @@
-import { ContactRequestStatus } from '@/Cmune/DataCenter/Common/Entities';
+import { ContactRequestStatus } from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
 import { DataTypes, Model, type Sequelize } from 'sequelize';
 
 export interface ContactRequestAttributes {

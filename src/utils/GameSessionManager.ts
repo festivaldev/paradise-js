@@ -1,4 +1,4 @@
-import { PublicProfileView } from '@/Cmune/DataCenter/Common/Entities';
+import { PublicProfileView } from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
 import { GameSession } from '@/models';
 import { Op } from 'sequelize';
 

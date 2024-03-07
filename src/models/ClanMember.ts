@@ -1,4 +1,4 @@
-import { GroupPosition } from '@/Cmune/DataCenter/Common/Entities';
+import { GroupPosition } from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
 import { DataTypes, Model, type Sequelize } from 'sequelize';
 
 export interface ClanMemberAttributes {

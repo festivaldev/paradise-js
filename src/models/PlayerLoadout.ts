@@ -1,4 +1,4 @@
-import { AvatarType } from '@/UberStrike/Core/Types';
+import { AvatarType } from '@festivaldev/uberstrike-js/UberStrike/Core/Types';
 import { UberstrikeInventoryItem } from '@/utils';
 import { DataTypes, Model, type Sequelize } from 'sequelize';
 

@@ -1,4 +1,4 @@
-import { PointsDepositType } from '@/Cmune/DataCenter/Common/Entities';
+import { PointsDepositType } from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
 import { DataTypes, Model, type Sequelize } from 'sequelize';
 
 export interface PointDepositAttributes {

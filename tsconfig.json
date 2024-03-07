@@ -1,35 +1,33 @@
 {
-  "compilerOptions": {
-    "allowSyntheticDefaultImports": true,
-    "allowJs": true,
-    "baseUrl": "./",
-    "composite": true,
-    "declaration": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "lib": [
-      "DOM",
-      "DOM.Iterable",
-      "ESNext"
-    ],
-    "module": "ES2015",
-    "moduleDetection": "force",
-    "moduleResolution": "bundler",
-    "noImplicitAny": false,
-    "outDir": "./dist",
-    "paths": {
-      "@/*": [
-        "src/*"
-      ]
-    },
-    "removeComments": true,
-    "rootDir": "./src",
-    "skipLibCheck": true,
-    "strict": true,
-    "strictPropertyInitialization": false,
-    "target": "ESNext",
-    "verbatimModuleSyntax": false
-  },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "wwwroot", "Paradise.Settings.WebServices.yml"]
+	"compilerOptions": {
+		"allowJs": true,
+		"baseUrl": "./",
+		"esModuleInterop": true,
+		"isolatedModules": true,
+		"lib": [
+			"ESNext",
+			"DOM",
+			"DOM.Iterable"
+		],
+		"module": "NodeNext",
+		"moduleDetection": "force",
+		"moduleResolution": "NodeNext",
+		"noImplicitAny": false,
+		"outDir": "dist",
+		"paths": {
+			"@/*": [
+				"src/*"
+			]
+		},
+		"resolveJsonModule": true,
+		"resolvePackageJsonExports": true,
+		"skipLibCheck": true,
+		"sourceMap": true,
+		"strict": true,
+		"strictPropertyInitialization": false,
+		"target": "ESNext"
+	},
+	"include": [
+		"src/**/*.ts"
+	]
 }

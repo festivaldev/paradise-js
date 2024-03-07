@@ -1,8 +1,8 @@
-import { ChannelType, MemberAccessLevel, MemberOperationResult } from '@/Cmune/DataCenter/Common/Entities';
-import { CommActorInfo } from '@/UberStrike/Core/Models';
+import { ChannelType, MemberAccessLevel, MemberOperationResult } from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
+import { CommActorInfo } from '@festivaldev/uberstrike-js/UberStrike/Core/Models';
 import {
   CommActorInfoProxy, DateTimeProxy, EnumProxy, Int32Proxy, ListProxy, StringProxy,
-} from '@/UberStrike/Core/Serialization';
+} from '@festivaldev/uberstrike-js/UberStrike/Core/Serialization';
 import {
   Clan, ClanMember, ModerationAction, PublicProfile,
 } from '@/models';

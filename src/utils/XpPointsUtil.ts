@@ -1,5 +1,5 @@
 import { ApplicationConfiguration } from '@/models';
-import { ApplicationConfigurationView } from '@/UberStrike/Core/Models/Views';
+import { ApplicationConfigurationView } from '@festivaldev/uberstrike-js/UberStrike/Core/Models/Views';
 
 export default class XpPointsUtil {
   private static Config: ApplicationConfigurationView;

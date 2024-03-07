@@ -1,5 +1,6 @@
-import { MemberAccessLevel } from '@/Cmune/DataCenter/Common/Entities';
+import { MemberAccessLevel } from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
 import ParadiseCommand from '../ParadiseCommand';
+import { MemberWallet, PublicProfile } from '@/models';
 
 export default class WalletCommand extends ParadiseCommand {
   public static override Command: string = 'wallet';
@@ -22,8 +23,6 @@ export default class WalletCommand extends ParadiseCommand {
   public override MinimumAccessLevel: MemberAccessLevel = MemberAccessLevel.Moderator;
 
   public override async Run(args: string[]): Promise<any> {
-    const { MemberWallet, PublicProfile } = global.sequelize.models;
-
     if (args.length < 2) {
       this.PrintUsageText();
       return;
@@ -50,7 +49,9 @@ export default class WalletCommand extends ParadiseCommand {
 
           for (const profile of profiles) {
             const wallet = wallets.find((_) => _.Cmid === profile.Cmid);
-            this.WriteLine(`| ${profile.Name.padEnd(18)} | ${String(profile.Cmid).padEnd(10)} | ${String(wallet.Credits).padEnd(7)} | ${String(wallet.Points).padEnd(7)} |`);
+            if (wallet) {
+              this.WriteLine(`| ${profile.Name.padEnd(18)} | ${String(profile.Cmid).padEnd(10)} | ${String(wallet.Credits).padEnd(7)} | ${String(wallet.Points).padEnd(7)} |`);
+            }
           }
 
           this.WriteLine(' ----------------------------------------------------- ');

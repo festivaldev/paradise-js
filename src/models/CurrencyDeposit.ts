@@ -1,4 +1,4 @@
-import { ChannelType, PaymentProviderType } from '@/Cmune/DataCenter/Common/Entities';
+import { ChannelType, PaymentProviderType } from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
 import { DataTypes, Model, type Sequelize } from 'sequelize';
 
 export interface CurrencyDepositAttributes {

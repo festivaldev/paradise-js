@@ -1,4 +1,4 @@
-import { MemberAccessLevel } from '@/Cmune/DataCenter/Common/Entities';
+import { MemberAccessLevel } from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
 import { ModerationAction, PublicProfile } from '@/models';
 import { ModerationFlag } from '@/utils';
 import moment from 'moment';

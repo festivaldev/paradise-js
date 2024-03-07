@@ -1,15 +1,15 @@
 import {
   BuyItemResult, ItemInventoryView, MemberAccessLevel, MemberOperationResult, MemberView, MemberWalletView,
-} from '@/Cmune/DataCenter/Common/Entities';
+} from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
 import {
   BooleanProxy, CurrencyDepositViewProxy, CurrencyDepositsViewModelProxy, EnumProxy, Int32Proxy, ItemInventoryViewProxy,
   ItemTransactionsViewModelProxy,
   ListProxy, LoadoutViewProxy, MemberWalletViewProxy, PlayerStatisticsViewProxy, PointDepositViewProxy, PointDepositsViewModelProxy, StringProxy, UberstrikeUserViewModelProxy,
-} from '@/UberStrike/Core/Serialization';
+} from '@festivaldev/uberstrike-js/UberStrike/Core/Serialization';
 import {
   CurrencyDepositsViewModel, ItemTransactionsViewModel, PointDepositsViewModel, UberstrikeUserViewModel,
-} from '@/UberStrike/Core/ViewModel';
-import { LoadoutView, UberstrikeMemberView } from '@/UberStrike/DataCenter/Common/Entities';
+} from '@festivaldev/uberstrike-js/UberStrike/Core/ViewModel';
+import { LoadoutView, UberstrikeMemberView } from '@festivaldev/uberstrike-js/UberStrike/DataCenter/Common/Entities';
 import {
   CurrencyDeposit, ItemTransaction, MemberWallet, PlayerInventoryItem, PlayerLoadout, PlayerStatistics, PointDeposit, PublicProfile,
 } from '@/models';

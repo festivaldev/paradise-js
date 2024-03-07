@@ -1,9 +1,9 @@
-import { ChannelType, PhotonUsageType } from '@/Cmune/DataCenter/Common/Entities';
-import { ApplicationConfigurationView } from '@/UberStrike/Core/Models/Views';
+import { ChannelType, PhotonUsageType } from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
+import { ApplicationConfigurationView } from '@festivaldev/uberstrike-js/UberStrike/Core/Models/Views';
 import {
   ApplicationConfigurationViewProxy, AuthenticateApplicationViewProxy, EnumProxy, ListProxy, MapViewProxy, MatchStatsProxy, StringProxy,
-} from '@/UberStrike/Core/Serialization';
-import { AuthenticateApplicationView } from '@/UberStrike/DataCenter/Common/Entities';
+} from '@festivaldev/uberstrike-js/UberStrike/Core/Serialization';
+import { AuthenticateApplicationView } from '@festivaldev/uberstrike-js/UberStrike/DataCenter/Common/Entities';
 import {
   ApplicationConfiguration, Map, MapSettings, PhotonServer,
 } from '@/models';

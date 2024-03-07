@@ -1,9 +1,9 @@
 import {
   ContactGroupView, ContactRequestStatus, ContactRequestView, MemberOperationResult, PublicProfileView,
-} from '@/Cmune/DataCenter/Common/Entities';
+} from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
 import {
   BooleanProxy, ContactGroupViewProxy, ContactRequestViewProxy, EnumProxy, Int32Proxy, ListProxy, PublicProfileViewProxy, StringProxy,
-} from '@/UberStrike/Core/Serialization';
+} from '@festivaldev/uberstrike-js/UberStrike/Core/Serialization';
 import { ContactRequest, PublicProfile } from '@/models';
 import { ApiVersion } from '@/utils';
 import { Op } from 'sequelize';

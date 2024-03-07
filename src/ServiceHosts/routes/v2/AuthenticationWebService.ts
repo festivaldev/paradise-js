@@ -1,14 +1,14 @@
 import {
   AccountCompletionResult, BuyingDurationType, ChannelType,
   EmailAddressStatus, MemberAuthenticationResult, MemberView, MemberWalletView, PublicProfileView,
-} from '@/Cmune/DataCenter/Common/Entities';
+} from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
 import {
   AccountCompletionResultViewProxy, EnumProxy, Int32Proxy, MemberAuthenticationResultViewProxy, StringProxy,
-} from '@/UberStrike/Core/Serialization';
-import { MemberAuthenticationResultView } from '@/UberStrike/Core/ViewModel';
+} from '@festivaldev/uberstrike-js/UberStrike/Core/Serialization';
+import { MemberAuthenticationResultView } from '@festivaldev/uberstrike-js/UberStrike/Core/ViewModel';
 import {
   AccountCompletionResultView, PlayerPersonalRecordStatisticsView, PlayerStatisticsView, PlayerWeaponStatisticsView,
-} from '@/UberStrike/DataCenter/Common/Entities';
+} from '@festivaldev/uberstrike-js/UberStrike/DataCenter/Common/Entities';
 import {
   Clan, ClanMember, CurrencyDeposit, ItemTransaction, MemberWallet, ModerationAction, PlayerInventoryItem, PlayerLoadout, PlayerStatistics, PublicProfile, SteamMember,
 } from '@/models';

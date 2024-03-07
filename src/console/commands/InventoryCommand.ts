@@ -1,5 +1,5 @@
-import { MemberAccessLevel } from '@/Cmune/DataCenter/Common/Entities';
-import { LoadoutSlotType } from '@/UberStrike/Core/Types';
+import { MemberAccessLevel } from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
+import { LoadoutSlotType } from '@festivaldev/uberstrike-js/UberStrike/Core/Types';
 import { PlayerInventoryItem, PlayerLoadout, PublicProfile } from '@/models';
 import { UberstrikeInventoryItem } from '@/utils';
 import { Op } from 'sequelize';

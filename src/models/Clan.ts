@@ -1,4 +1,4 @@
-import { GroupColor, GroupFontStyle } from '@/Cmune/DataCenter/Common/Entities';
+import { GroupColor, GroupFontStyle } from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
 import { ClanMember } from '@/models';
 import { DataTypes, Model, type Sequelize } from 'sequelize';
 

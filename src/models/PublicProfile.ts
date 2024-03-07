@@ -1,5 +1,7 @@
-import { EmailAddressStatus, MemberAccessLevel } from '@/Cmune/DataCenter/Common/Entities';
-import { DataTypes, Model, Op, Utils, type Sequelize } from 'sequelize';
+import { EmailAddressStatus, MemberAccessLevel } from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
+import {
+  DataTypes, Model, Op, Utils, type Sequelize,
+} from 'sequelize';
 
 export interface PublicProfileAttributes {
   Cmid?: number;
