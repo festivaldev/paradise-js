@@ -1,0 +1,3 @@
+[submodule "uberstrike-js"]
+	path = uberstrike-js
+	url = https://github.com/festivaldev/uberstrike-js
