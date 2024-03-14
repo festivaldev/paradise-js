@@ -225,6 +225,7 @@ const RECONNECT_INTERVAL = 10;
 const MAX_RECONNECT = 10;
 const SEND_TIMEOUT = 3;
 const RECEIVE_TIMEOUT = 3;
+const PING_INTERVAL = 10;
 
 export class WebSocketConnection {
   public ConnectionId: string;
@@ -237,6 +238,9 @@ export class WebSocketConnection {
 
   private sendTask?: Promise<void>;
   private receiveTask?: Promise<void>;
+
+  private pingTask?: ReturnType<typeof setInterval>;
+  private pingDisconnect?: ReturnType<typeof setTimeout>;
 
   constructor(params: any = {}) {
     Object.keys(params).filter((key) => key in this).forEach((key) => { this[key] = params[key]; });
@@ -325,6 +329,25 @@ export class WebSocketConnection {
 
     if (oneWay) return null;
   }
+
+  public OnOpen(): void {
+    this.pingTask = setInterval(() => {
+      this.SendPacket(PacketType.Ping);
+
+      this.pingDisconnect = setTimeout(() => {
+        this.Socket.close();
+      }, RECEIVE_TIMEOUT * 1000);
+    }, PING_INTERVAL * 1000);
+  }
+
+  public OnClose(): void {
+    clearInterval(this.pingTask);
+  }
+
+  public ResetPingTimeout(): void {
+    this.LastResponseTime = new Date();
+    clearTimeout(this.pingDisconnect);
+  }
 }
 
 export default class WebSocketHost extends EventEmitter {
@@ -360,6 +383,8 @@ export default class WebSocketHost extends EventEmitter {
       client.on('close', () => {
         try {
           if (Object.keys(this.ConnectedSockets).includes(socketClient.ConnectionId)) {
+            socketClient.OnClose();
+
             delete this.ConnectedSockets[socketClient.ConnectionId];
 
             switch (socketClient.Type) {
@@ -413,6 +438,9 @@ export default class WebSocketHost extends EventEmitter {
               socketClient.SendPacket(PacketType.ClientInfo);
               break;
             }
+            case PacketType.Pong:
+              socketClient.ResetPingTimeout();
+              break;
             default: break;
           }
         } else { // JSON Object
@@ -530,6 +558,8 @@ export default class WebSocketHost extends EventEmitter {
               this.emit('ClientConnected', {
                 Socket: socketClient,
               });
+
+              socketClient.OnOpen();
 
               await socketClient.Send(PacketType.ConnectionStatus, new SocketConnectionStatus({
                 Connected: true,
