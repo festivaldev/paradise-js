@@ -30,6 +30,16 @@ export class ParadiseServiceSettings {
 
   public FileServerRoot: string = 'wwwroot';
 
+  /**
+   * @deprecated Use a reverse proxy to provide SSL encryption
+   */
+  public EnableSSL: bool = false;
+
+  /**
+   * @deprecated Use a reverse proxy to provide SSL encryption
+   */
+  public SSLCertificateName: string;
+
   constructor(path: string) {
     try {
       const settings = YAML.parse(fs.readFileSync(path, 'utf-8'));

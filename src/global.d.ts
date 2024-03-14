@@ -3,7 +3,7 @@
 /* eslint-disable no-unused-vars */
 
 import * as ws from 'ws';
-import type ParadiseServiceSettings from '@/ParadiseServiceSettings';
+import { type ParadiseServiceSettings } from '@/ParadiseServiceSettings';
 import { Socket } from 'net';
 
 declare global {

@@ -44,7 +44,7 @@ enum SocketState {
   Disconnecting
 }
 
-enum PacketType {
+export enum PacketType {
   MagicBytes = 1,
   ClientInfo,
   ConnectionStatus,
@@ -58,7 +58,7 @@ enum PacketType {
   Error,
 
   ChatMessage = 1 << 10,
-  // PlayerList,
+  PlayerList,
   PlayerJoined,
   PlayerLeft,
   RoomOpened,
@@ -398,7 +398,6 @@ export default class WebSocketHost extends EventEmitter {
 
       client.on('message', async (data) => {
         const inputBytes = [...data as Buffer];
-        const outputBytes = [];
 
         const payloadType = Int32Proxy.Deserialize(inputBytes);
         if (payloadType === 0x42) { // Packet / Raw Data
@@ -521,8 +520,7 @@ export default class WebSocketHost extends EventEmitter {
 
               this.ConnectedSockets[socketClient.ConnectionId] = socketClient;
 
-              // TODO: Add encryption stuff
-              const uuidByteArray = [...Buffer.from(('3f1f73a2-2239-4c81-b4d7-1afb8713a703').replaceAll('-', ''), 'hex')];
+              const uuidByteArray = [...Buffer.from(socketClient.Info.SocketId.replaceAll('-', ''), 'hex')];
               const uuidBytes = Buffer.from(uuidByteArray.slice(0, 4).reverse().concat(uuidByteArray.slice(4, 6).reverse())
                 .concat(uuidByteArray.slice(6, 8).reverse())
                 .concat(uuidByteArray.slice(8)));
@@ -539,21 +537,13 @@ export default class WebSocketHost extends EventEmitter {
 
               break;
             }
-
-            case PacketType.CommandOutput: {
-              // const key = crypto.pbkdf2Sync('A0670cy/I52btR5Gs1lFkHuH2ivNaWGGmbaQWbcZ7Gi1ozu8K9lks13awZPBC6zHtX9bR9lOcvNPqTRm2sEoEg==', Buffer.from('3f1f73a2-2239-4c81-b4d7-1afb8713a703', 'utf-8'), 10000, 32, 'sha1');
-              // const iv = Buffer.from('3f1f73a2-2239-4c81-b4d7-1afb8713a703', 'utf-8');
-              // const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
-
-              // // Decrypt the ciphertext
-              // let decrypted = decipher.update(payloadObj.Data, 'base64', 'utf-8');
-              // decrypted += decipher.final('utf-8');
-
-              // console.log(decrypted);
-              console.log(payload);
+            default:
+              Log.debug(PacketType[payloadObj.Type]);
+              this.emit('DataReceived', {
+                Socket: socketClient,
+                Payload: payloadObj,
+              });
               break;
-            }
-            default: break;
           }
         }
       });
