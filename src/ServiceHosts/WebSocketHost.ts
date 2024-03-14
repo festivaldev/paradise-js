@@ -1,6 +1,6 @@
 import ParadiseServiceSettings from '@/ParadiseServiceSettings';
 import {
-  ArrayProxy, ByteProxy, EnumProxy, Int32Proxy, StringProxy,
+  ArrayProxy, ByteProxy, CommActorInfoProxy, DictionaryProxy, EndOfMatchDataProxy, EnumProxy, GameRoomDataProxy, Int32Proxy, StringProxy,
 } from '@festivaldev/uberstrike-js/UberStrike/Core/Serialization';
 import { Log } from '@/utils';
 import crypto from 'crypto';
@@ -160,13 +160,75 @@ export class WebSocketPayload {
     const bytes: any[] = [];
 
     switch (type) {
-      case PacketType.ClientInfo:
-        StringProxy.Serialize(bytes, JSON.stringify(data));
+      case PacketType.MagicBytes:
+      case PacketType.Ping:
+      case PacketType.Pong:
         break;
+      case PacketType.ClientInfo:
       case PacketType.ConnectionStatus:
         StringProxy.Serialize(bytes, JSON.stringify(data));
         break;
-      default: return [null, null];
+      case PacketType.Command:
+      case PacketType.Error:
+      case PacketType.ChatMessage:
+        payloadObj.IsEncrypted = true;
+
+        StringProxy.Serialize(bytes, JSON.stringify(data));
+        break;
+      case PacketType.CommandOutput:
+        payloadObj.IsEncrypted = true;
+
+        StringProxy.Serialize(bytes, data);
+        break;
+      case PacketType.Monitoring:
+      case PacketType.BanPlayer:
+        payloadObj.IsEncrypted = true;
+
+        DictionaryProxy.Serialize<string, object>(bytes, data, StringProxy.Serialize, (stream, instance) => {
+          StringProxy.Serialize(stream, JSON.stringify(instance));
+        });
+        break;
+      case PacketType.PlayerList:
+        /// TODO
+        break;
+      case PacketType.PlayerJoined:
+      case PacketType.PlayerLeft:
+        payloadObj.IsEncrypted = true;
+
+        CommActorInfoProxy.Serialize(bytes, data);
+        break;
+      case PacketType.RoomOpened:
+      case PacketType.RoomClosed:
+        payloadObj.IsEncrypted = true;
+
+        GameRoomDataProxy.Serialize(bytes, data);
+        break;
+      case PacketType.RoundStarted: {
+        payloadObj.IsEncrypted = true;
+
+        const list = data as any[];
+        GameRoomDataProxy.Serialize(bytes, list[0]);
+        break;
+      }
+      case PacketType.RoundEnded: {
+        payloadObj.IsEncrypted = true;
+
+        const list = data as any[];
+        GameRoomDataProxy.Serialize(bytes, list[0]);
+        EndOfMatchDataProxy.Serialize(bytes, list[1]);
+        break;
+      }
+      case PacketType.OpenRoom:
+        /// TODO
+        break;
+      case PacketType.CloseRoom:
+        payloadObj.IsEncrypted = true;
+
+        Int32Proxy.Serialize(bytes, data);
+        break;
+      default:
+        Log.warn(`Rejecting to encode payload of type ${PacketType[type]}: Unknown type.`);
+        return [null, null];
     }
 
     if (crypto != null && payloadObj.IsEncrypted) {
@@ -203,20 +265,56 @@ export class WebSocketPayload {
     const bytes = [...data];
     let result: any;
     switch (payloadObj.Type) {
+      case PacketType.MagicBytes:
+      case PacketType.Ping:
+      case PacketType.Pong:
+        break;
       case PacketType.ClientInfo:
-        result = JSON.parse(StringProxy.Deserialize(bytes));
-        break;
       case PacketType.ConnectionStatus:
+      case PacketType.Command:
+      case PacketType.Error:
+      case PacketType.CommandOutput:
+      case PacketType.ChatMessage:
         result = JSON.parse(StringProxy.Deserialize(bytes));
         break;
-
-      case PacketType.CommandOutput:
-        result = StringProxy.Deserialize(bytes);
+      case PacketType.Monitoring:
+      case PacketType.BanPlayer:
+        result = DictionaryProxy.Deserialize<string, object>(bytes, StringProxy.Deserialize, (stream) => JSON.parse(StringProxy.Deserialize(stream)));
         break;
-      default: break;
+      case PacketType.PlayerList:
+        /// TODO;
+        break;
+      case PacketType.PlayerJoined:
+      case PacketType.PlayerLeft:
+        result = CommActorInfoProxy.Deserialize(bytes);
+        break;
+      case PacketType.RoomOpened:
+      case PacketType.RoomClosed:
+        result = GameRoomDataProxy.Deserialize(bytes);
+        break;
+      case PacketType.RoundStarted:
+        result = [
+          GameRoomDataProxy.Deserialize(bytes),
+        ];
+        break;
+      case PacketType.RoundEnded:
+        result = [
+          GameRoomDataProxy.Deserialize(bytes),
+          EndOfMatchDataProxy.Deserialize(bytes),
+        ];
+        break;
+      case PacketType.OpenRoom:
+        /// TODO
+        break;
+      case PacketType.CloseRoom:
+        result = Int32Proxy.Deserialize(bytes);
+        break;
+      default:
+        Log.warn(`Rejecting to decode payload of type ${PacketType[payloadObj.Type]}: Unknown type.`);
+        break;
     }
 
-    return [result, payloadObj];
+    return [result as T, payloadObj];
   }
 }
 
