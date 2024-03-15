@@ -1,6 +1,6 @@
 # Paradise Web Services
 
-Hostname: '127.0.0.1'
+Hostname: '0.0.0.0'
 
 # Port Settings
 WebServicePort: 8080
@@ -8,11 +8,13 @@ FileServerPort: 8081
 TCPCommPort: 8082
 
 # Database Settings
-DatabaseServer: ''
-DatabasePort: 3306 # MySQL/MariaDB
-DatabaseUser: ''
-DatabasePassword: ''
-DatabaseName: ''
+DatabaseSettings:
+  Server: '1'
+  Type: 'mysql'
+  Port: 3306 # MySQL/MariaDB
+  Username: ''
+  Password: ''
+  DatabaseName: 'paradise'
 
 #region Web Service Settings
 WebServicePrefix: 'UberStrike.DataCenter.WebService.CWS.'
@@ -24,3 +26,36 @@ ServerPassPhrases:
     PassPhrase: 'mysupersecretpassphrase'
 PluginBlacklist:
   - MyBlacklistedPlugin.plugin
+
+# File Server Settings
+FileServerRoot: 'wwwroot'
+
+# SSL Settings - Obsolete: Use a reverse proxy to provide SSL encryption
+EnableSSL: false
+SSLCertificateName: ''
+
+# Discord Settings
+DiscordSettings:
+  Enabled: true
+  BotToken: ''
+  Integrations:
+    LobbyChat: true
+    Commands: true
+    PlayerJoinAnnouncements: true
+    PlayerLeaveAnnouncements: true
+    RoomOpenAnnouncements: true
+    RoomCloseAnnouncements: true
+    RoundStartAnnouncements: true
+    RoundEndAnnouncements: true
+    ErrorLog: true
+  GuildId: ''
+  ChatChannelId: ''
+  CommandChannelId: ''
+  WebHooks:
+    LobbyChat: ''
+    PlayerAnnouncements: ''
+    RoomAnnouncements: ''
+    RoundAnnouncements: ''
+    ErrorLog: ''
+  AnnouncementBlacklist: # A list of Cmids to not publish any announcements for
+    -

@@ -2,13 +2,12 @@
 /* eslint-disable no-var */
 /* eslint-disable no-unused-vars */
 
-import * as ws from 'ws';
-import { type ParadiseServiceSettings } from '@/ParadiseServiceSettings';
 import { Socket } from 'net';
+import * as ws from 'ws';
 
-declare global {
-  var ServiceSettings: ParadiseServiceSettings;
-}
+// declare global {
+//   var ServiceSettings: ParadiseServiceSettings;
+// }
 
 declare module 'ws' {
   export interface WebSocket extends ws {

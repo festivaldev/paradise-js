@@ -1,3 +1,4 @@
+import { DiscordSettings } from '@/discord/DiscordSettings';
 import { Log } from '@/utils';
 import fs from 'fs';
 import path from 'path';
@@ -8,6 +9,15 @@ export class ServerPassPhrase {
   public PassPhrase: string;
 }
 
+export class DatabaseSettings {
+  public Server: string;
+  public Type: string = 'mysql';
+  public Port: number = 3306;
+  public Username: string;
+  public Password: string;
+  public DatabaseName: string = 'paradise';
+}
+
 export class ParadiseServiceSettings {
   public Hostname: string = '127.0.0.1';
 
@@ -15,12 +25,7 @@ export class ParadiseServiceSettings {
   public FileServerPort: number = 8081;
   public SocketPort: number = 8082;
 
-  public DatabaseServer: string;
-  public DatabaseType: string = 'mysql';
-  public DatabasePort: number = 3306;
-  public DatabaseUser: string;
-  public DatabasePassword: string;
-  public DatabaseName: string = 'paradise';
+  public DatabaseSettings: DatabaseSettings;
 
   public WebServicePrefix: string = 'UberStrike.DataCenter.WebService.CWS.';
   public WebServiceSuffix: string = 'Contract.svc';
@@ -39,6 +44,8 @@ export class ParadiseServiceSettings {
    * @deprecated Use a reverse proxy to provide SSL encryption
    */
   public SSLCertificateName: string;
+
+  public DiscordSettings: DiscordSettings;
 
   constructor(path: string) {
     try {

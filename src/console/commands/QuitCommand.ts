@@ -1,3 +1,4 @@
+import ParadiseService from '@/ParadiseService';
 import { MemberAccessLevel } from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
 import ParadiseCommand from '../ParadiseCommand';
 
@@ -15,9 +16,6 @@ export default class QuitCommand extends ParadiseCommand {
   public override MinimumAccessLevel: MemberAccessLevel = MemberAccessLevel.Admin;
 
   public override async Run(args: string[]): Promise<any> {
-    console.log('Bye.');
-    setTimeout(() => {
-      process.exit(0);
-    }, 500);
+    ParadiseService.Instance.Teardown();
   }
 }

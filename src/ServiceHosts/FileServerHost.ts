@@ -1,5 +1,7 @@
+import ParadiseService from '@/ParadiseService';
 import { Log } from '@/utils';
 import express, { type Express } from 'express';
+import * as http from 'http';
 import { type AddressInfo } from 'net';
 import path from 'path';
 
@@ -7,6 +9,7 @@ export default class FileServerHost {
   public readonly port: number;
 
   public readonly expressApp: Express;
+  private listener?: http.Server;
 
   constructor(port: number = 8081) {
     this.port = port;
@@ -27,12 +30,17 @@ export default class FileServerHost {
     Log.info('Starting HTTP server...');
 
     return new Promise((resolve, reject) => {
-      const listener = this.expressApp.listen(this.port, global.ServiceSettings.Hostname ?? '0.0.0.0', () => {
-        const address: AddressInfo = (listener.address() as AddressInfo);
+      this.listener = this.expressApp.listen(this.port, ParadiseService.Instance.ServiceSettings.Hostname ?? '0.0.0.0', () => {
+        const address: AddressInfo = (this.listener?.address() as AddressInfo);
         Log.info(`HTTP server listening on ${address.address}:${address.port}.`);
 
         resolve();
       });
     });
+  }
+
+  public stop(): void {
+    this.listener?.close();
+    this.listener = undefined;
   }
 }
