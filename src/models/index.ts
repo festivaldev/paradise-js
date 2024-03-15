@@ -3,6 +3,7 @@ import Clan from './Clan';
 import ClanMember from './ClanMember';
 import ContactRequest from './ContactRequest';
 import CurrencyDeposit from './CurrencyDeposit';
+import DiscordUser from './DiscordUser';
 import GameSession from './GameSession';
 import GroupInvitation from './GroupInvitation';
 import ItemTransaction from './ItemTransaction';
@@ -31,6 +32,7 @@ export { default as Clan } from './Clan';
 export { default as ClanMember } from './ClanMember';
 export { default as ContactRequest } from './ContactRequest';
 export { default as CurrencyDeposit } from './CurrencyDeposit';
+export { default as DiscordUser } from './DiscordUser';
 export { default as GameSession } from './GameSession';
 export { default as GroupInvitation } from './GroupInvitation';
 export { default as ItemTransaction } from './ItemTransaction';
@@ -60,6 +62,7 @@ export default {
   ClanMember,
   ContactRequest,
   CurrencyDeposit,
+  DiscordUser,
   GameSession,
   GroupInvitation,
   ItemTransaction,
