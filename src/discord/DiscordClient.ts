@@ -116,7 +116,7 @@ export default class DiscordClient {
     }
 
     const embed = new EmbedBuilder({
-      description: message.Message,
+      description: message.Message.replace(/(_|\*|~|`|\||\\)/g, '\\$1'),
       footer: {
         text: 'UberStrike Lobby Chat',
         icon_url: this.discordClient.user?.avatarURL()!,
