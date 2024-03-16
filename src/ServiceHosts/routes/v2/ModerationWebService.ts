@@ -1,12 +1,12 @@
+import {
+  Clan, ClanMember, ModerationAction, PublicProfile,
+} from '@/models';
+import { ApiVersion, ModerationFlag } from '@/utils/';
 import { ChannelType, MemberAccessLevel, MemberOperationResult } from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
 import { CommActorInfo } from '@festivaldev/uberstrike-js/UberStrike/Core/Models';
 import {
   CommActorInfoProxy, DateTimeProxy, EnumProxy, Int32Proxy, ListProxy, StringProxy,
 } from '@festivaldev/uberstrike-js/UberStrike/Core/Serialization';
-import {
-  Clan, ClanMember, ModerationAction, PublicProfile,
-} from '@/models';
-import { ApiVersion, ModerationFlag } from '@/utils/';
 import { Op } from 'sequelize';
 import BaseWebService from './BaseWebService';
 
@@ -17,7 +17,10 @@ export default class ModerationWebService extends BaseWebService {
 
   protected static get ServiceInterface(): string { return 'IModerationWebServiceContract'; }
 
-  public static async BanPermanently(bytes: byte[], outputStream: byte[]) {
+  public static async BanPermanently(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
       const targetCmid = Int32Proxy.Deserialize(bytes);
@@ -30,7 +33,10 @@ export default class ModerationWebService extends BaseWebService {
     }
   }
 
-  public static async SetModerationFlag(bytes: byte[], outputStream: byte[]) {
+  public static async SetModerationFlag(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
       const targetCmid = Int32Proxy.Deserialize(bytes);
@@ -85,12 +91,21 @@ export default class ModerationWebService extends BaseWebService {
           }
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('SetModerationFlag', error);
     }
+
+    return null;
   }
 
-  public static async UnsetModerationFlag(bytes: byte[], outputStream: byte[]) {
+  public static async UnsetModerationFlag(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
       const targetCmid = Int32Proxy.Deserialize(bytes);
@@ -130,12 +145,21 @@ export default class ModerationWebService extends BaseWebService {
           }
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('UnsetModerationFlag', error);
     }
+
+    return null;
   }
 
-  public static async ClearModerationFlags(bytes: byte[], outputStream: byte[]) {
+  public static async ClearModerationFlags(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
       const targetCmid = Int32Proxy.Deserialize(bytes);
@@ -176,12 +200,21 @@ export default class ModerationWebService extends BaseWebService {
           }
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('ClearModerationFlags', error);
     }
+
+    return null;
   }
 
-  public static async GetNaughtyList(bytes: byte[], outputStream: byte[]) {
+  public static async GetNaughtyList(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
 
@@ -232,8 +265,14 @@ export default class ModerationWebService extends BaseWebService {
           }
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('GetNaughtyList', error);
     }
+
+    return null;
   }
 }

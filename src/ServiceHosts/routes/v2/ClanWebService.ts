@@ -1,14 +1,14 @@
 import {
+  Clan, ClanMember, ContactRequest, GroupInvitation, PlayerInventoryItem, PlayerStatistics, PublicProfile,
+} from '@/models';
+import { ApiVersion, UberstrikeInventoryItem, XpPointsUtil } from '@/utils';
+import {
   ClanCreationReturnView,
   ClanRequestAcceptView, ClanRequestDeclineView, ClanView, ContactRequestStatus, GroupInvitationView, GroupPosition, GroupType, MemberAccessLevel,
 } from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
 import {
   ClanCreationReturnViewProxy, ClanRequestAcceptViewProxy, ClanRequestDeclineViewProxy, ClanViewProxy, GroupCreationViewProxy, GroupInvitationViewProxy, Int32Proxy, ListProxy, MemberPositionUpdateViewProxy, StringProxy,
 } from '@festivaldev/uberstrike-js/UberStrike/Core/Serialization';
-import {
-  Clan, ClanMember, ContactRequest, GroupInvitation, PlayerInventoryItem, PlayerStatistics, PublicProfile,
-} from '@/models';
-import { ApiVersion, UberstrikeInventoryItem, XpPointsUtil } from '@/utils';
 import { Op } from 'sequelize';
 import BaseWebService from './BaseWebService';
 
@@ -37,7 +37,10 @@ export default class ClanWebService extends BaseWebService {
 
   protected static get ServiceInterface(): string { return 'IClanWebServiceContract'; }
 
-  static async AcceptClanInvitation(bytes: byte[], outputStream: byte[]) {
+  static async AcceptClanInvitation(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const clanInvitationId = Int32Proxy.Deserialize(bytes);
       const authToken = StringProxy.Deserialize(bytes);
@@ -73,7 +76,9 @@ export default class ClanWebService extends BaseWebService {
                   ClanView: clan.get({ plain: true }),
                 }));
 
-                return;
+                return isEncrypted
+                  ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+                  : outputStream;
               }
             }
           }
@@ -84,12 +89,21 @@ export default class ClanWebService extends BaseWebService {
           ClanRequestId: clanInvitationId,
         }));
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('AcceptClanInvitation', error);
     }
+
+    return null;
   }
 
-  static async CancelInvitation(bytes: byte[], outputStream: byte[]) {
+  static async CancelInvitation(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const groupInvitationId = Int32Proxy.Deserialize(bytes);
       const authToken = StringProxy.Deserialize(bytes);
@@ -112,24 +126,41 @@ export default class ClanWebService extends BaseWebService {
           }
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('CancelInvitation', error);
     }
+
+    return null;
   }
 
-  static async CanOwnClan(bytes: byte[], outputStream: byte[]) {
+  static async CanOwnClan(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
 
       this.debugEndpoint('CanOwnClan', authToken);
 
       throw new Error('Not Implemented');
+      // return isEncrypted
+      //   ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+      //   : outputStream;
     } catch (error) {
       this.handleEndpointError('CanOwnClan', error);
     }
+
+    return null;
   }
 
-  static async CreateClan(bytes: byte[], outputStream: byte[]) {
+  static async CreateClan(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const createClanData = GroupCreationViewProxy.Deserialize(bytes);
 
@@ -150,7 +181,9 @@ export default class ClanWebService extends BaseWebService {
                 ResultCode: ClanCreationResultCode.ClanCollision,
               }));
 
-              return;
+              return isEncrypted
+                ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+                : outputStream;
             }
 
             const friendsList = await ContactRequest.findAll({
@@ -246,12 +279,21 @@ export default class ClanWebService extends BaseWebService {
           }
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('CreateClan', error);
     }
+
+    return null;
   }
 
-  static async DeclineClanInvitation(bytes: byte[], outputStream: byte[]) {
+  static async DeclineClanInvitation(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const clanInvitationId = Int32Proxy.Deserialize(bytes);
       const authToken = StringProxy.Deserialize(bytes);
@@ -280,12 +322,21 @@ export default class ClanWebService extends BaseWebService {
           }
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('DeclineClanInvitation', error);
     }
+
+    return null;
   }
 
-  static async DisbandGroup(bytes: byte[], outputStream: byte[]) {
+  static async DisbandGroup(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const groupId = Int32Proxy.Deserialize(bytes);
       const authToken = StringProxy.Deserialize(bytes);
@@ -314,12 +365,21 @@ export default class ClanWebService extends BaseWebService {
           }
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('DisbandGroup', error);
     }
+
+    return null;
   }
 
-  static async GetAllGroupInvitations(bytes: byte[], outputStream: byte[]) {
+  static async GetAllGroupInvitations(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
 
@@ -335,12 +395,21 @@ export default class ClanWebService extends BaseWebService {
           ListProxy.Serialize<GroupInvitationView>(outputStream, (groupInvitations as GroupInvitationView[]), GroupInvitationViewProxy.Serialize);
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('GetAllGroupInvitations', error);
     }
+
+    return null;
   }
 
-  static async GetMyClanId(bytes: byte[], outputStream: byte[]) {
+  static async GetMyClanId(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
 
@@ -362,17 +431,26 @@ export default class ClanWebService extends BaseWebService {
             if (await clan.Members.find((_) => _.Cmid === steamMember.Cmid)) {
               Int32Proxy.Serialize(outputStream, clan.GroupId);
 
-              return;
+              break;
             }
           }
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('GetMyClanId', error);
     }
+
+    return null;
   }
 
-  static async GetOwnClan(bytes: byte[], outputStream: byte[]) {
+  static async GetOwnClan(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
 
@@ -395,17 +473,26 @@ export default class ClanWebService extends BaseWebService {
             if (clan.Members.find((_) => _.Cmid === steamMember.Cmid)) {
               ClanViewProxy.Serialize(outputStream, new ClanView({ ...clan.get({ plain: true }) }));
 
-              return;
+              break;
             }
           }
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('GetOwnClan', error);
     }
+
+    return null;
   }
 
-  static async GetPendingGroupInvitations(bytes: byte[], outputStream: byte[]) {
+  static async GetPendingGroupInvitations(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const groupId = Int32Proxy.Deserialize(bytes);
       const authToken = StringProxy.Deserialize(bytes);
@@ -422,12 +509,21 @@ export default class ClanWebService extends BaseWebService {
           ListProxy.Serialize<GroupInvitationView>(outputStream, (groupInvitations as GroupInvitationView[]), GroupInvitationViewProxy.Serialize);
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('GetPendingGroupInvitations', error);
     }
+
+    return null;
   }
 
-  static async InviteMemberToJoinAGroup(bytes: byte[], outputStream: byte[]) {
+  static async InviteMemberToJoinAGroup(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const clanId = Int32Proxy.Deserialize(bytes);
       const authToken = StringProxy.Deserialize(bytes);
@@ -467,12 +563,21 @@ export default class ClanWebService extends BaseWebService {
           }
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('InviteMemberToJoinAGroup', error);
     }
+
+    return null;
   }
 
-  static async KickMemberFromClan(bytes: byte[], outputStream: byte[]) {
+  static async KickMemberFromClan(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const groupId = Int32Proxy.Deserialize(bytes);
       const authToken = StringProxy.Deserialize(bytes);
@@ -486,53 +591,58 @@ export default class ClanWebService extends BaseWebService {
 
         if (!steamMember) {
           Int32Proxy.Serialize(outputStream, ClanActionResultCode.Error);
-          return;
+        } else {
+          const publicProfile = await PublicProfile.findOne({ where: { Cmid: steamMember.Cmid } });
+          const toKickProfile = await PublicProfile.findOne({ where: { Cmid: cmidToKick } });
+
+          if (!publicProfile || !toKickProfile) {
+            Int32Proxy.Serialize(outputStream, ClanActionResultCode.Error);
+          } else {
+            const clan = await Clan.findOne({
+              where: {
+                GroupId: groupId,
+              },
+              include: [{
+                model: ClanMember,
+                as: 'Members',
+                required: false,
+              }],
+            });
+
+            if (!clan) {
+              Int32Proxy.Serialize(outputStream, ClanActionResultCode.Error);
+            } else {
+              const clanMember = clan.Members.find((_) => _.Cmid === publicProfile.Cmid);
+              const memberToKick = clan.Members.find((_) => _.Cmid === cmidToKick);
+
+              if ((!clanMember || !memberToKick)
+                || (memberToKick.Position === GroupPosition.Officer && clanMember.Position !== GroupPosition.Leader)
+                || (memberToKick.Position === GroupPosition.Member && !(clanMember.Position === GroupPosition.Officer || clanMember.Position === GroupPosition.Leader))) {
+                Int32Proxy.Serialize(outputStream, ClanActionResultCode.Error);
+              } else {
+                await memberToKick.destroy();
+
+                Int32Proxy.Serialize(outputStream, ClanActionResultCode.Success);
+              }
+            }
+          }
         }
-
-        const publicProfile = await PublicProfile.findOne({ where: { Cmid: steamMember.Cmid } });
-        const toKickProfile = await PublicProfile.findOne({ where: { Cmid: cmidToKick } });
-
-        if (!publicProfile || !toKickProfile) {
-          Int32Proxy.Serialize(outputStream, ClanActionResultCode.Error);
-          return;
-        }
-
-        const clan = await Clan.findOne({
-          where: {
-            GroupId: groupId,
-          },
-          include: [{
-            model: ClanMember,
-            as: 'Members',
-            required: false,
-          }],
-        });
-
-        if (!clan) {
-          Int32Proxy.Serialize(outputStream, ClanActionResultCode.Error);
-          return;
-        }
-
-        const clanMember = clan.Members.find((_) => _.Cmid === publicProfile.Cmid);
-        const memberToKick = clan.Members.find((_) => _.Cmid === cmidToKick);
-
-        if ((!clanMember || !memberToKick)
-          || (memberToKick.Position === GroupPosition.Officer && clanMember.Position !== GroupPosition.Leader)
-          || (memberToKick.Position === GroupPosition.Member && !(clanMember.Position === GroupPosition.Officer || clanMember.Position === GroupPosition.Leader))) {
-          Int32Proxy.Serialize(outputStream, ClanActionResultCode.Error);
-          return;
-        }
-
-        await memberToKick.destroy();
-
-        Int32Proxy.Serialize(outputStream, ClanActionResultCode.Success);
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('KickMemberFromClan', error);
     }
+
+    return null;
   }
 
-  static async LeaveAClan(bytes: byte[], outputStream: byte[]) {
+  static async LeaveAClan(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const groupId = Int32Proxy.Deserialize(bytes);
       const authToken = StringProxy.Deserialize(bytes);
@@ -545,49 +655,54 @@ export default class ClanWebService extends BaseWebService {
 
         if (!steamMember) {
           Int32Proxy.Serialize(outputStream, ClanActionResultCode.Error);
-          return;
+        } else {
+          const publicProfile = await PublicProfile.findOne({ where: { Cmid: steamMember.Cmid } });
+
+          if (!publicProfile) {
+            Int32Proxy.Serialize(outputStream, ClanActionResultCode.Error);
+          } else {
+            const clan = await Clan.findOne({
+              where: {
+                GroupId: groupId,
+              },
+              include: [{
+                model: ClanMember,
+                as: 'Members',
+                required: false,
+              }],
+            });
+
+            if (!clan) {
+              Int32Proxy.Serialize(outputStream, ClanActionResultCode.Error);
+            } else {
+              const clanMember = clan.Members.find((_) => _.Cmid === publicProfile.Cmid);
+
+              if (!clanMember || clanMember.Position !== GroupPosition.Leader) {
+                Int32Proxy.Serialize(outputStream, ClanActionResultCode.Error);
+              } else {
+                await clanMember.destroy();
+
+                Int32Proxy.Serialize(outputStream, ClanActionResultCode.Success);
+              }
+            }
+          }
         }
-
-        const publicProfile = await PublicProfile.findOne({ where: { Cmid: steamMember.Cmid } });
-
-        if (!publicProfile) {
-          Int32Proxy.Serialize(outputStream, ClanActionResultCode.Error);
-          return;
-        }
-
-        const clan = await Clan.findOne({
-          where: {
-            GroupId: groupId,
-          },
-          include: [{
-            model: ClanMember,
-            as: 'Members',
-            required: false,
-          }],
-        });
-
-        if (!clan) {
-          Int32Proxy.Serialize(outputStream, ClanActionResultCode.Error);
-          return;
-        }
-
-        const clanMember = clan.Members.find((_) => _.Cmid === publicProfile.Cmid);
-
-        if (!clanMember || clanMember.Position !== GroupPosition.Leader) {
-          Int32Proxy.Serialize(outputStream, ClanActionResultCode.Error);
-          return;
-        }
-
-        await clanMember.destroy();
-
-        Int32Proxy.Serialize(outputStream, ClanActionResultCode.Success);
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('LeaveAClan', error);
     }
+
+    return null;
   }
 
-  static async TransferOwnership(bytes: byte[], outputStream: byte[]) {
+  static async TransferOwnership(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const groupId = Int32Proxy.Deserialize(bytes);
       const authToken = StringProxy.Deserialize(bytes);
@@ -601,85 +716,90 @@ export default class ClanWebService extends BaseWebService {
 
         if (!steamMember) {
           Int32Proxy.Serialize(outputStream, ClanActionResultCode.Error);
-          return;
-        }
-
-        const publicProfile = await PublicProfile.findOne({ where: { Cmid: steamMember.Cmid } });
-        const newLeaderProfile = await PublicProfile.findOne({ where: { Cmid: newLeaderCmid } });
-
-        if (!publicProfile || !newLeaderProfile) {
-          Int32Proxy.Serialize(outputStream, ClanActionResultCode.Error);
-          return;
-        }
-
-        const clan = await Clan.findOne({
-          where: {
-            GroupId: groupId,
-          },
-          include: [{
-            model: ClanMember,
-            as: 'Members',
-            required: false,
-          }],
-        });
-
-        if (!clan) {
-          Int32Proxy.Serialize(outputStream, ClanActionResultCode.Error);
-          return;
-        }
-
-        const clanMember = clan!.Members.find((_) => _.Cmid === publicProfile.Cmid);
-        const newLeader = clan!.Members.find((_) => _.Cmid === newLeaderCmid);
-
-        if ((!clanMember || !newLeader) || clanMember.Position !== GroupPosition.Leader) {
-          Int32Proxy.Serialize(outputStream, ClanActionResultCode.Error);
-          return;
-        }
-
-        const friendsList = await ContactRequest.findAll({
-          where: {
-            [Op.or]: {
-              InitiatorCmid: newLeaderProfile.Cmid,
-              ReceiverCmid: newLeaderProfile.Cmid,
-            },
-            Status: ContactRequestStatus.Accepted,
-          },
-        });
-        const playerStatistics = await PlayerStatistics.findOne({ where: { Cmid: newLeaderProfile.Cmid } });
-        const hasClanLicense = (await PlayerInventoryItem.findOne({ where: { Cmid: newLeaderProfile.Cmid, ItemId: UberstrikeInventoryItem.ClanLicense } })) != null;
-
-        if (XpPointsUtil.GetLevelForXp(playerStatistics!.Xp) < 4) {
-          Int32Proxy.Serialize(outputStream, ClanCreationResultCode.RequirementPlayerLevel);
-        } else if (friendsList.length < 1) {
-          Int32Proxy.Serialize(outputStream, ClanCreationResultCode.RequirementPlayerFriends);
-        } else if (!hasClanLicense) {
-          Int32Proxy.Serialize(outputStream, ClanCreationResultCode.RequirementClanLicense);
         } else {
-          await clan.update({
-            OwnerCmid: newLeaderProfile.Cmid,
-            OwnerName: newLeaderProfile.Name,
-          });
+          const publicProfile = await PublicProfile.findOne({ where: { Cmid: steamMember.Cmid } });
+          const newLeaderProfile = await PublicProfile.findOne({ where: { Cmid: newLeaderCmid } });
 
-          clanMember.Position = newLeader.Position;
-          newLeader.Position = GroupPosition.Leader;
+          if (!publicProfile || !newLeaderProfile) {
+            Int32Proxy.Serialize(outputStream, ClanActionResultCode.Error);
+          } else {
+            const clan = await Clan.findOne({
+              where: {
+                GroupId: groupId,
+              },
+              include: [{
+                model: ClanMember,
+                as: 'Members',
+                required: false,
+              }],
+            });
 
-          await clanMember.update({
-            Position: newLeader.Position,
-          });
+            if (!clan) {
+              Int32Proxy.Serialize(outputStream, ClanActionResultCode.Error);
+            } else {
+              const clanMember = clan!.Members.find((_) => _.Cmid === publicProfile.Cmid);
+              const newLeader = clan!.Members.find((_) => _.Cmid === newLeaderCmid);
 
-          await newLeader.update({
-            Position: GroupPosition.Leader,
-          });
+              if ((!clanMember || !newLeader) || clanMember.Position !== GroupPosition.Leader) {
+                Int32Proxy.Serialize(outputStream, ClanActionResultCode.Error);
+              } else {
+                const friendsList = await ContactRequest.findAll({
+                  where: {
+                    [Op.or]: {
+                      InitiatorCmid: newLeaderProfile.Cmid,
+                      ReceiverCmid: newLeaderProfile.Cmid,
+                    },
+                    Status: ContactRequestStatus.Accepted,
+                  },
+                });
+                const playerStatistics = await PlayerStatistics.findOne({ where: { Cmid: newLeaderProfile.Cmid } });
+                const hasClanLicense = (await PlayerInventoryItem.findOne({ where: { Cmid: newLeaderProfile.Cmid, ItemId: UberstrikeInventoryItem.ClanLicense } })) != null;
 
-          Int32Proxy.Serialize(outputStream, ClanActionResultCode.Success);
+                if (XpPointsUtil.GetLevelForXp(playerStatistics!.Xp) < 4) {
+                  Int32Proxy.Serialize(outputStream, ClanCreationResultCode.RequirementPlayerLevel);
+                } else if (friendsList.length < 1) {
+                  Int32Proxy.Serialize(outputStream, ClanCreationResultCode.RequirementPlayerFriends);
+                } else if (!hasClanLicense) {
+                  Int32Proxy.Serialize(outputStream, ClanCreationResultCode.RequirementClanLicense);
+                } else {
+                  await clan.update({
+                    OwnerCmid: newLeaderProfile.Cmid,
+                    OwnerName: newLeaderProfile.Name,
+                  });
+
+                  clanMember.Position = newLeader.Position;
+                  newLeader.Position = GroupPosition.Leader;
+
+                  await clanMember.update({
+                    Position: newLeader.Position,
+                  });
+
+                  await newLeader.update({
+                    Position: GroupPosition.Leader,
+                  });
+
+                  Int32Proxy.Serialize(outputStream, ClanActionResultCode.Success);
+                }
+              }
+            }
+          }
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('TransferOwnership', error);
     }
+
+    return null;
   }
 
-  static async UpdateMemberPosition(bytes: byte[], outputStream: byte[]) {
+  static async UpdateMemberPosition(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const updateMemberPositionData = MemberPositionUpdateViewProxy.Deserialize(bytes);
 
@@ -691,51 +811,53 @@ export default class ClanWebService extends BaseWebService {
 
         if (!steamMember) {
           Int32Proxy.Serialize(outputStream, ClanActionResultCode.Error);
-          return;
+        } else {
+          const publicProfile = await PublicProfile.findOne({ where: { Cmid: steamMember.Cmid } });
+          const targetProfile = await PublicProfile.findOne({ where: { Cmid: updateMemberPositionData.MemberCmid } });
+
+          if (!publicProfile || !targetProfile) {
+            Int32Proxy.Serialize(outputStream, ClanActionResultCode.Error);
+          } else {
+            const clan = await Clan.findOne({
+              where: {
+                GroupId: updateMemberPositionData.GroupId,
+              },
+              include: [{
+                model: ClanMember,
+                as: 'Members',
+                required: false,
+              }],
+            });
+
+            if (!clan) {
+              Int32Proxy.Serialize(outputStream, ClanActionResultCode.Error);
+            } else {
+              const clanMember = clan.Members.find((_) => _.Cmid === publicProfile.Cmid);
+              const targetClanMember = clan.Members.find((_) => _.Cmid === targetProfile.Cmid);
+
+              if ((!clanMember || !targetClanMember)
+                || (targetClanMember.Position === GroupPosition.Officer && clanMember.Position !== GroupPosition.Leader)
+                || (targetClanMember.Position === GroupPosition.Member && !(clanMember.Position === GroupPosition.Officer || clanMember.Position === GroupPosition.Leader))) {
+                Int32Proxy.Serialize(outputStream, ClanActionResultCode.Error);
+              } else {
+                await targetClanMember.update({
+                  Position: updateMemberPositionData.Position,
+                });
+
+                Int32Proxy.Serialize(outputStream, ClanActionResultCode.Success);
+              }
+            }
+          }
         }
-
-        const publicProfile = await PublicProfile.findOne({ where: { Cmid: steamMember.Cmid } });
-        const targetProfile = await PublicProfile.findOne({ where: { Cmid: updateMemberPositionData.MemberCmid } });
-
-        if (!publicProfile || !targetProfile) {
-          Int32Proxy.Serialize(outputStream, ClanActionResultCode.Error);
-          return;
-        }
-
-        const clan = await Clan.findOne({
-          where: {
-            GroupId: updateMemberPositionData.GroupId,
-          },
-          include: [{
-            model: ClanMember,
-            as: 'Members',
-            required: false,
-          }],
-        });
-
-        if (!clan) {
-          Int32Proxy.Serialize(outputStream, ClanActionResultCode.Error);
-          return;
-        }
-
-        const clanMember = clan.Members.find((_) => _.Cmid === publicProfile.Cmid);
-        const targetClanMember = clan.Members.find((_) => _.Cmid === targetProfile.Cmid);
-
-        if ((!clanMember || !targetClanMember)
-          || (targetClanMember.Position === GroupPosition.Officer && clanMember.Position !== GroupPosition.Leader)
-          || (targetClanMember.Position === GroupPosition.Member && !(clanMember.Position === GroupPosition.Officer || clanMember.Position === GroupPosition.Leader))) {
-          Int32Proxy.Serialize(outputStream, ClanActionResultCode.Error);
-          return;
-        }
-
-        await targetClanMember.update({
-          Position: updateMemberPositionData.Position,
-        });
-
-        Int32Proxy.Serialize(outputStream, ClanActionResultCode.Success);
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('UpdateMemberPosition', error);
     }
+
+    return null;
   }
 }

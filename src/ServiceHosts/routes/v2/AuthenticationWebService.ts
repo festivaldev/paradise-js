@@ -1,4 +1,10 @@
 import {
+  Clan, ClanMember, CurrencyDeposit, ItemTransaction, MemberWallet, ModerationAction, PlayerInventoryItem, PlayerLoadout, PlayerStatistics, PublicProfile, SteamMember,
+} from '@/models';
+import {
+  ApiVersion, Log, ModerationFlag, UberstrikeInventoryItem,
+} from '@/utils';
+import {
   AccountCompletionResult, BuyingDurationType, ChannelType,
   EmailAddressStatus, MemberAuthenticationResult, MemberView, MemberWalletView, PublicProfileView,
 } from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
@@ -9,12 +15,6 @@ import { MemberAuthenticationResultView } from '@festivaldev/uberstrike-js/UberS
 import {
   AccountCompletionResultView, PlayerPersonalRecordStatisticsView, PlayerStatisticsView, PlayerWeaponStatisticsView,
 } from '@festivaldev/uberstrike-js/UberStrike/DataCenter/Common/Entities';
-import {
-  Clan, ClanMember, CurrencyDeposit, ItemTransaction, MemberWallet, ModerationAction, PlayerInventoryItem, PlayerLoadout, PlayerStatistics, PublicProfile, SteamMember,
-} from '@/models';
-import {
-  ApiVersion, Log, ModerationFlag, UberstrikeInventoryItem,
-} from '@/utils';
 import crypto from 'crypto';
 import BaseWebService from './BaseWebService';
 
@@ -25,7 +25,10 @@ export default class AuthenticationWebService extends BaseWebService {
 
   protected static get ServiceInterface(): string { return 'IAuthenticationWebServiceContract'; }
 
-  static async CompleteAccount(bytes: byte[], outputStream: byte[]) {
+  static async CompleteAccount(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const cmid = Int32Proxy.Deserialize(bytes);
       const name = StringProxy.Deserialize(bytes);
@@ -141,12 +144,21 @@ export default class AuthenticationWebService extends BaseWebService {
           },
         }));
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('CompleteAccount', error);
     }
+
+    return null;
   }
 
-  static async CreateUser(bytes: byte[], outputStream: byte[]) {
+  static async CreateUser(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const emailAddress = StringProxy.Deserialize(bytes);
       const password = StringProxy.Deserialize(bytes);
@@ -157,9 +169,14 @@ export default class AuthenticationWebService extends BaseWebService {
       this.debugEndpoint('CreateUser', emailAddress, password, channel, locale, machineId);
 
       throw new Error('Not Implemented');
+      // return isEncrypted
+      //   ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+      //   : outputStream;
     } catch (error) {
       this.handleEndpointError('CreateUser', error);
     }
+
+    return null;
   }
 
   static async LinkSteamMember(bytes: byte[], outputStream: byte[]) {
@@ -172,9 +189,14 @@ export default class AuthenticationWebService extends BaseWebService {
       this.debugEndpoint('LinkSteamMember', email, password, steamId, machineId);
 
       throw new Error('Not Implemented');
+      // return isEncrypted
+      //   ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+      //   : outputStream;
     } catch (error) {
       this.handleEndpointError('LinkSteamMember', error);
     }
+
+    return null;
   }
 
   static async LoginMemberEmail(bytes: byte[], outputStream: byte[]) {
@@ -187,9 +209,14 @@ export default class AuthenticationWebService extends BaseWebService {
       this.debugEndpoint('LoginMemberEmail', email, password, channel, machineId);
 
       throw new Error('Not Implemented');
+      // return isEncrypted
+      //   ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+      //   : outputStream;
     } catch (error) {
       this.handleEndpointError('LoginMemberEmail', error);
     }
+
+    return null;
   }
 
   static async LoginMemberFacebookUnitySdk(bytes: byte[], outputStream: byte[]) {
@@ -201,9 +228,14 @@ export default class AuthenticationWebService extends BaseWebService {
       this.debugEndpoint('LoginMemberFacebookUnitySdk', facebookPlayerAccessToken, channel, machineId);
 
       throw new Error('Not Implemented');
+      // return isEncrypted
+      //   ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+      //   : outputStream;
     } catch (error) {
       this.handleEndpointError('LoginMemberFacebookUnitySdk', error);
     }
+
+    return null;
   }
 
   static async LoginMemberPortal(bytes: byte[], outputStream: byte[]) {
@@ -215,12 +247,20 @@ export default class AuthenticationWebService extends BaseWebService {
       this.debugEndpoint('LoginMemberPortal', cmid, hash, machineId);
 
       throw new Error('Not Implemented');
+      // return isEncrypted
+      //   ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+      //   : outputStream;
     } catch (error) {
       this.handleEndpointError('LoginMemberPortal', error);
     }
+
+    return null;
   }
 
-  static async LoginSteam(bytes: byte[], outputStream: byte[]) {
+  static async LoginSteam(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const steamId = StringProxy.Deserialize(bytes);
       const authToken = StringProxy.Deserialize(bytes);
@@ -358,12 +398,21 @@ export default class AuthenticationWebService extends BaseWebService {
           }
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('LoginSteam', error);
     }
+
+    return null;
   }
 
-  static async VerifyAuthToken(bytes: byte[], outputStream: byte[]) {
+  static async VerifyAuthToken(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
 
@@ -436,8 +485,14 @@ export default class AuthenticationWebService extends BaseWebService {
           }
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('VerifyAuthToken', error);
     }
+
+    return null;
   }
 }

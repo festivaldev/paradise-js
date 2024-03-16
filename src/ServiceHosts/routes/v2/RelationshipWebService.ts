@@ -1,11 +1,11 @@
+import { ContactRequest, PublicProfile } from '@/models';
+import { ApiVersion } from '@/utils';
 import {
   ContactGroupView, ContactRequestStatus, ContactRequestView, MemberOperationResult, PublicProfileView,
 } from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
 import {
   BooleanProxy, ContactGroupViewProxy, ContactRequestViewProxy, EnumProxy, Int32Proxy, ListProxy, PublicProfileViewProxy, StringProxy,
 } from '@festivaldev/uberstrike-js/UberStrike/Core/Serialization';
-import { ContactRequest, PublicProfile } from '@/models';
-import { ApiVersion } from '@/utils';
 import { Op } from 'sequelize';
 import BaseWebService from './BaseWebService';
 
@@ -14,7 +14,10 @@ export default class RelationshipWebService extends BaseWebService {
   public static get ServiceVersion(): string { return ApiVersion.Current; }
   protected static get ServiceInterface(): string { return 'IRelationshipWebServiceContract'; }
 
-  public static async AcceptContactRequest(bytes: byte[], outputStream: byte[]) {
+  public static async AcceptContactRequest(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
       const contactRequestId = Int32Proxy.Deserialize(bytes);
@@ -42,12 +45,21 @@ export default class RelationshipWebService extends BaseWebService {
           }
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('AcceptContactRequest', error);
     }
+
+    return null;
   }
 
-  public static async DeclineContactRequest(bytes: byte[], outputStream: byte[]) {
+  public static async DeclineContactRequest(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
       const contactRequestId = Int32Proxy.Deserialize(bytes);
@@ -70,12 +82,21 @@ export default class RelationshipWebService extends BaseWebService {
           }
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('DeclineContactRequest', error);
     }
+
+    return null;
   }
 
-  public static async DeleteContact(bytes: byte[], outputStream: byte[]) {
+  public static async DeleteContact(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
       const contactCmid = Int32Proxy.Deserialize(bytes);
@@ -105,12 +126,21 @@ export default class RelationshipWebService extends BaseWebService {
           }
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('DeleteContact', error);
     }
+
+    return null;
   }
 
-  public static async GetContactRequests(bytes: byte[], outputStream: byte[]) {
+  public static async GetContactRequests(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
 
@@ -131,12 +161,21 @@ export default class RelationshipWebService extends BaseWebService {
           ListProxy.Serialize<ContactRequestView>(outputStream, contactRequests as ContactRequestView[], ContactRequestViewProxy.Serialize);
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('GetContactRequests', error);
     }
+
+    return null;
   }
 
-  public static async GetContactsByGroups(bytes: byte[], outputStream: byte[]) {
+  public static async GetContactsByGroups(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
       const populateFacebookIds = BooleanProxy.Deserialize(bytes);
@@ -175,12 +214,21 @@ export default class RelationshipWebService extends BaseWebService {
           ListProxy.Serialize<ContactGroupView>(outputStream, contacts, ContactGroupViewProxy.Serialize);
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('GetContactsByGroups', error);
     }
+
+    return null;
   }
 
-  public static async SendContactRequest(bytes: byte[], outputStream: byte[]) {
+  public static async SendContactRequest(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
       const receiverCmid = Int32Proxy.Deserialize(bytes);
@@ -213,8 +261,14 @@ export default class RelationshipWebService extends BaseWebService {
           }
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('SendContactRequest', error);
     }
+
+    return null;
   }
 }

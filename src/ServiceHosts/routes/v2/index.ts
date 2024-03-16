@@ -40,15 +40,14 @@ router.use(new RegExp(`^/${ParadiseServiceSettings.WebServicePrefix}(.+)${Paradi
   if (bodyMethod !== method || !service[method]) return res.status(httpStatus.INTERNAL_SERVER_ERROR).send(SOAPResponse.createFault(req.headers.soapaction));
 
   const inputBytes = [...Buffer.from(bodyData, 'base64')];
-  const outputStream = [];
 
   try {
-    await service[method](inputBytes, outputStream);
+    const bytes = await service[method](inputBytes, []);
 
     res.setHeader('Content-Type', 'text/xml; charset=utf-8');
     res.setHeader('Server', 'Microsoft-HTTPAPI/2.0');
 
-    return res.status(httpStatus.OK).send(SOAPResponse.create(bodyMethod, outputStream));
+    return res.status(httpStatus.OK).send(SOAPResponse.create(bodyMethod, bytes ?? []));
   } catch (error: any) {
     console.error(error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).send(error.message);

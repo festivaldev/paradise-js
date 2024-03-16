@@ -1,13 +1,13 @@
+import {
+  ApplicationConfiguration, Map, MapSettings, PhotonServer,
+} from '@/models';
+import { ApiVersion } from '@/utils';
 import { ChannelType, PhotonUsageType } from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
 import { ApplicationConfigurationView } from '@festivaldev/uberstrike-js/UberStrike/Core/Models/Views';
 import {
   ApplicationConfigurationViewProxy, AuthenticateApplicationViewProxy, EnumProxy, ListProxy, MapViewProxy, MatchStatsProxy, StringProxy,
 } from '@festivaldev/uberstrike-js/UberStrike/Core/Serialization';
 import { AuthenticateApplicationView } from '@festivaldev/uberstrike-js/UberStrike/DataCenter/Common/Entities';
-import {
-  ApplicationConfiguration, Map, MapSettings, PhotonServer,
-} from '@/models';
-import { ApiVersion } from '@/utils';
 import BaseWebService from './BaseWebService';
 
 export default class ApplicationWebService extends BaseWebService {
@@ -18,7 +18,9 @@ export default class ApplicationWebService extends BaseWebService {
   static supportedClientVersions: List<string> = ['4.7.1'];
   static supportedClientChannels: List<ChannelType> = [ChannelType.Steam];
 
-  static async AuthenticateApplication(bytes: byte[], outputStream: byte[]) {
+  static async AuthenticateApplication(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const bytes = data;
+
     try {
       const clientVersion = StringProxy.Deserialize(bytes);
       const channelType = EnumProxy.Deserialize<ChannelType>(bytes);
@@ -36,16 +38,23 @@ export default class ApplicationWebService extends BaseWebService {
           GameServers: (await PhotonServer.findAll({ where: { UsageType: PhotonUsageType.All }, raw: true })),
           CommServer: (await PhotonServer.findAll({ where: { UsageType: PhotonUsageType.CommServer }, order: [['MinLatency', 'ASC']], raw: true }))[0] ?? null,
           WarnPlayer: !ApplicationWebService.supportedClientVersions.includes(clientVersion),
-          // EncryptionInitVector: this.EncryptionInitVector,
-          // EncryptionPassPhrase: this.EncryptionPassPhrase
+          EncryptionInitVector: this.EncryptionInitVector,
+          EncryptionPassPhrase: this.EncryptionPassPhrase,
         }));
       }
+
+      return outputStream;
     } catch (e) {
       this.handleEndpointError('AuthenticateApplication', e);
     }
+
+    return null;
   }
 
-  static async GetConfigurationData(bytes: byte[], outputStream: byte[]) {
+  static async GetConfigurationData(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const clientVersion = StringProxy.Deserialize(bytes);
 
@@ -56,12 +65,21 @@ export default class ApplicationWebService extends BaseWebService {
 
         ApplicationConfigurationViewProxy.Serialize(outputStream, new ApplicationConfigurationView({ ...applicationConfiguration!.get({ plain: true }) }));
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (e) {
       this.handleEndpointError('AutGetConfigurationDatahenticateApplication', e);
     }
+
+    return null;
   }
 
-  static async GetMaps(bytes: byte[], outputStream: byte[]) {
+  static async GetMaps(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const clientVersion = StringProxy.Deserialize(bytes);
       const clientType = EnumProxy.Deserialize(bytes);
@@ -96,12 +114,21 @@ export default class ApplicationWebService extends BaseWebService {
 
         ListProxy.Serialize(outputStream, mapData, MapViewProxy.Serialize);
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (e) {
       this.handleEndpointError('GetMaps', e);
     }
+
+    return null;
   }
 
-  static async GetCustomMaps(bytes: byte[], outputStream: byte[]) {
+  static async GetCustomMaps(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const clientVersion = StringProxy.Deserialize(bytes);
       const clientType = EnumProxy.Deserialize(bytes);
@@ -136,12 +163,21 @@ export default class ApplicationWebService extends BaseWebService {
 
         ListProxy.Serialize(outputStream, mapData, MapViewProxy.Serialize);
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (e) {
       this.handleEndpointError('GetCustomMaps', e);
     }
+
+    return null;
   }
 
-  static async SetMatchScore(bytes: byte[], outputStream: byte[]) {
+  static async SetMatchScore(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const clientVersion = StringProxy.Deserialize(bytes);
       const scoringView = MatchStatsProxy.Deserialize(bytes);
@@ -150,8 +186,13 @@ export default class ApplicationWebService extends BaseWebService {
       this.debugEndpoint('SetMatchScore', clientVersion, scoringView, serverAuthentication);
 
       throw new Error('Not Implemented');
+      // return isEncrypted
+      //   ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+      //   : outputStream;
     } catch (e) {
       this.handleEndpointError('SetMatchScore', e);
     }
+
+    return null;
   }
 }

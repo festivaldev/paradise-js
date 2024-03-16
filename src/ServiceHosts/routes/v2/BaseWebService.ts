@@ -1,13 +1,13 @@
 import ParadiseServiceSettings from '@/ParadiseServiceSettings';
 import { Log } from '@/utils';
-// import RijndaelCryptographyPolicy from '../../utils/RijndaelCryptographyPolicy';
+import RijndaelCryptographyPolicy from '@/utils/RijndaelCryptographyPolicy';
 
 export default abstract class BaseWebService {
   public static get ServiceName(): string | null { return null; }
   public static get ServiceVersion(): string | null { return null; }
   protected static get ServiceInterface(): string | null { return null; }
 
-  // public static readonly CryptoPolicy = new RijndaelCryptographyPolicy();
+  public static readonly CryptoPolicy = new RijndaelCryptographyPolicy();
 
   public static get EncryptionPassPhrase(): string {
     return ParadiseServiceSettings.EncryptionPassPhrase as string;
@@ -27,12 +27,11 @@ export default abstract class BaseWebService {
   }
 
   public static isEncrypted(data: byte[]): bool {
-    // try {
-    //   this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector);
-    //   return true;
-    // } catch (error) {
-    //   return false;
-    // }
-    return false;
+    try {
+      this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector);
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 }

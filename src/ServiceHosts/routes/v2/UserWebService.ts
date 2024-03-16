@@ -1,4 +1,8 @@
 import {
+  CurrencyDeposit, ItemTransaction, MemberWallet, PlayerInventoryItem, PlayerLoadout, PlayerStatistics, PointDeposit, PublicProfile,
+} from '@/models';
+import { ApiVersion, UberstrikeInventoryItem } from '@/utils';
+import {
   BuyItemResult, ItemInventoryView, MemberAccessLevel, MemberOperationResult, MemberView, MemberWalletView,
 } from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
 import {
@@ -10,10 +14,6 @@ import {
   CurrencyDepositsViewModel, ItemTransactionsViewModel, PointDepositsViewModel, UberstrikeUserViewModel,
 } from '@festivaldev/uberstrike-js/UberStrike/Core/ViewModel';
 import { LoadoutView, UberstrikeMemberView } from '@festivaldev/uberstrike-js/UberStrike/DataCenter/Common/Entities';
-import {
-  CurrencyDeposit, ItemTransaction, MemberWallet, PlayerInventoryItem, PlayerLoadout, PlayerStatistics, PointDeposit, PublicProfile,
-} from '@/models';
-import { ApiVersion, UberstrikeInventoryItem } from '@/utils';
 import { Op } from 'sequelize';
 import BaseWebService from './BaseWebService';
 
@@ -22,7 +22,10 @@ export default class UserWebService extends BaseWebService {
   public static get ServiceVersion(): string { return ApiVersion.Current; }
   protected static get ServiceInterface(): string { return 'IUserWebServiceContract'; }
 
-  static async ChangeMemberName(bytes: byte[], outputStream: byte[]) {
+  static async ChangeMemberName(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
       const name = StringProxy.Deserialize(bytes);
@@ -66,12 +69,21 @@ export default class UserWebService extends BaseWebService {
           EnumProxy.Serialize<MemberOperationResult>(outputStream, MemberOperationResult.MemberNotFound);
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('ChangeMemberName', error);
     }
+
+    return null;
   }
 
-  static async DepositCredits(bytes: byte[], outputStream: byte[]) {
+  static async DepositCredits(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const depositTransaction = CurrencyDepositViewProxy.Deserialize(bytes);
       const authToken = StringProxy.Deserialize(bytes);
@@ -100,12 +112,21 @@ export default class UserWebService extends BaseWebService {
           }
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('DepositCredits', error);
     }
+
+    return null;
   }
 
-  static async DepositPoints(bytes: byte[], outputStream: byte[]) {
+  static async DepositPoints(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const depositTransaction = PointDepositViewProxy.Deserialize(bytes);
       const authToken = StringProxy.Deserialize(bytes);
@@ -134,12 +155,21 @@ export default class UserWebService extends BaseWebService {
           }
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('DepositPoints', error);
     }
+
+    return null;
   }
 
-  static async GenerateNonDuplicatedMemberNames(bytes: byte[], outputStream: byte[]) {
+  static async GenerateNonDuplicatedMemberNames(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const username = StringProxy.Deserialize(bytes);
 
@@ -158,12 +188,21 @@ export default class UserWebService extends BaseWebService {
       }
 
       ListProxy.Serialize<string>(outputStream, generatedUsernames, StringProxy.Serialize);
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('GenerateNonDuplicatedMemberNames', error);
     }
+
+    return null;
   }
 
-  static async GetCurrencyDeposits(bytes: byte[], outputStream: byte[]) {
+  static async GetCurrencyDeposits(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
       const pageIndex = Int32Proxy.Deserialize(bytes);
@@ -189,12 +228,21 @@ export default class UserWebService extends BaseWebService {
           }));
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('GetCurrencyDeposits', error);
     }
+
+    return null;
   }
 
-  static async GetInventory(bytes: byte[], outputStream: byte[]) {
+  static async GetInventory(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
 
@@ -216,12 +264,21 @@ export default class UserWebService extends BaseWebService {
           ListProxy.Serialize<ItemInventoryView>(outputStream, playerInventoryItems as ItemInventoryView[], ItemInventoryViewProxy.Serialize);
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('GetInventory', error);
     }
+
+    return null;
   }
 
-  static async GetItemTransactions(bytes: byte[], outputStream: byte[]) {
+  static async GetItemTransactions(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
       const pageIndex = Int32Proxy.Deserialize(bytes);
@@ -247,12 +304,21 @@ export default class UserWebService extends BaseWebService {
           }));
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('GetItemTransactions', error);
     }
+
+    return null;
   }
 
-  static async GetLoadout(bytes: byte[], outputStream: byte[]) {
+  static async GetLoadout(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
 
@@ -287,12 +353,21 @@ export default class UserWebService extends BaseWebService {
           LoadoutViewProxy.Serialize(outputStream, new LoadoutView({ ...playerLoadout.get({ plain: true }) }));
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('GetLoadout', error);
     }
+
+    return null;
   }
 
-  static async GetMember(bytes, outputStream) {
+  static async GetMember(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
 
@@ -320,36 +395,61 @@ export default class UserWebService extends BaseWebService {
           }
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('GetMember', error);
     }
+
+    return null;
   }
 
-  static async GetMemberListSessionData(bytes, outputStream) {
+  static async GetMemberListSessionData(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authTokens = ListProxy.Deserialize<string>(bytes, StringProxy.Deserialize);
 
       this.debugEndpoint('GetMemberListSessionData', authTokens);
 
       throw new Error('Not Implemented');
+      // return isEncrypted
+      //   ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+      //   : outputStream;
     } catch (error) {
       this.handleEndpointError('GetMemberListSessionData', error);
     }
+
+    return null;
   }
 
-  static async GetMemberSessionData(bytes, outputStream) {
+  static async GetMemberSessionData(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
 
       this.debugEndpoint('GetMemberSessionData', authToken);
 
       throw new Error('Not Implemented');
+      // return isEncrypted
+      //   ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+      //   : outputStream;
     } catch (error) {
       this.handleEndpointError('GetMemberSessionData', error);
     }
+
+    return null;
   }
 
-  static async GetMemberWallet(bytes, outputStream) {
+  static async GetMemberWallet(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
 
@@ -371,12 +471,21 @@ export default class UserWebService extends BaseWebService {
           }
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('GetMemberWallet', error);
     }
+
+    return null;
   }
 
-  static async GetPointsDeposits(bytes: byte[], outputStream: byte[]) {
+  static async GetPointsDeposits(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
       const pageIndex = Int32Proxy.Deserialize(bytes);
@@ -402,24 +511,42 @@ export default class UserWebService extends BaseWebService {
           }));
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('GetPointsDeposits', error);
     }
+
+    return null;
   }
 
-  static async IsDuplicateMemberName(bytes: byte[], outputStream: byte[]) {
+  static async IsDuplicateMemberName(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const username = StringProxy.Deserialize(bytes);
 
       this.debugEndpoint('IsDuplicateMemberName', username);
 
       BooleanProxy.Serialize(outputStream, (await PublicProfile.findOne({ where: { Name: username } })) !== undefined);
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('IsDuplicateMemberName', error);
     }
+
+    return null;
   }
 
-  static async SetLoadout(bytes: byte[], outputStream: byte[]) {
+  static async SetLoadout(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
       let loadoutView = LoadoutViewProxy.Deserialize(bytes);
@@ -430,13 +557,17 @@ export default class UserWebService extends BaseWebService {
       if (session) {
         const steamMember = await session.SteamMember;
 
-        if (steamMember) {
+        if (!steamMember) {
+          EnumProxy.Serialize<MemberOperationResult>(outputStream, MemberOperationResult.MemberNotFound);
+        } else {
           const playerInventory = await PlayerInventoryItem.findAll({ where: { Cmid: steamMember.Cmid } });
 
           loadoutView = this.filterLoadout(loadoutView, playerInventory);
 
           const playerLoadout = await PlayerLoadout.findOne({ where: { Cmid: steamMember.Cmid } });
-          if (playerLoadout) {
+          if (!playerLoadout) {
+            EnumProxy.Serialize<MemberOperationResult>(outputStream, MemberOperationResult.InvalidData);
+          } else {
             await playerLoadout.update({
               UpperBody: loadoutView.UpperBody,
               Weapon1: loadoutView.Weapon1,
@@ -461,22 +592,26 @@ export default class UserWebService extends BaseWebService {
               Webbing: loadoutView.Webbing, // Holo
               SkinColor: loadoutView.SkinColor,
             });
-          } else {
-            EnumProxy.Serialize<MemberOperationResult>(outputStream, MemberOperationResult.InvalidData);
-            return;
-          }
 
-          EnumProxy.Serialize<MemberOperationResult>(outputStream, MemberOperationResult.Ok);
-        } else {
-          EnumProxy.Serialize<MemberOperationResult>(outputStream, MemberOperationResult.MemberNotFound);
+            EnumProxy.Serialize<MemberOperationResult>(outputStream, MemberOperationResult.Ok);
+          }
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('SetLoadout', error);
     }
+
+    return null;
   }
 
-  static async UpdatePlayerStatistics(bytes: byte[], outputStream: byte[]) {
+  static async UpdatePlayerStatistics(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
       const playerStatistics = PlayerStatisticsViewProxy.Deserialize(bytes);
@@ -487,10 +622,14 @@ export default class UserWebService extends BaseWebService {
       if (session) {
         const steamMember = await session.SteamMember;
 
-        if (steamMember) {
+        if (!steamMember) {
+          EnumProxy.Serialize<MemberOperationResult>(outputStream, MemberOperationResult.MemberNotFound);
+        } else {
           const statistics = await PlayerStatistics.findOne({ where: { Cmid: steamMember.Cmid } });
 
-          if (statistics) {
+          if (!statistics) {
+            EnumProxy.Serialize<MemberOperationResult>(outputStream, MemberOperationResult.InvalidData);
+          } else {
             await statistics.update({
               Hits: playerStatistics.Hits,
               Shots: playerStatistics.Shots,
@@ -564,22 +703,26 @@ export default class UserWebService extends BaseWebService {
                 MostXPEarned: playerStatistics.PersonalRecord.MostXPEarned,
               },
             });
-          } else {
-            EnumProxy.Serialize<MemberOperationResult>(outputStream, MemberOperationResult.InvalidData);
-            return;
-          }
 
-          EnumProxy.Serialize<MemberOperationResult>(outputStream, MemberOperationResult.Ok);
-        } else {
-          EnumProxy.Serialize<MemberOperationResult>(outputStream, MemberOperationResult.MemberNotFound);
+            EnumProxy.Serialize<MemberOperationResult>(outputStream, MemberOperationResult.Ok);
+          }
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('UpdatePlayerStatistics', error);
     }
+
+    return null;
   }
 
-  static async RemoveItemFromInventory(bytes: byte[], outputStream: byte[]) {
+  static async RemoveItemFromInventory(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const itemId = Int32Proxy.Deserialize(bytes);
       const authToken = StringProxy.Deserialize(bytes);
@@ -592,52 +735,54 @@ export default class UserWebService extends BaseWebService {
 
         if (!steamMember) {
           Int32Proxy.Serialize(outputStream, BuyItemResult.InvalidMember);
-          return;
+        } else {
+          const publicProfile = await PublicProfile.findOne({ where: { Cmid: steamMember.Cmid } });
+
+          if (!publicProfile) {
+            Int32Proxy.Serialize(outputStream, BuyItemResult.InvalidMember);
+          } else {
+            const transaction = await ItemTransaction.findOne({ where: { Cmid: publicProfile.Cmid, ItemId: itemId } });
+            const item = await PlayerInventoryItem.findOne({ where: { Cmid: publicProfile.Cmid, ItemId: itemId } });
+
+            if (!transaction && !item) {
+              Int32Proxy.Serialize(outputStream, BuyItemResult.InvalidData);
+              // eslint-disable-next-line no-else-return
+            } else if (item) {
+              // Allow removing items added by the "inventory" command
+              await PlayerInventoryItem.destroy({
+                where: {
+                  Cmid: publicProfile.Cmid,
+                  ItemId: itemId,
+                },
+              });
+
+              Int32Proxy.Serialize(outputStream, BuyItemResult.OK);
+            } else {
+              const memberWallet = await MemberWallet.findOne({ where: { Cmid: publicProfile.Cmid } });
+              if (memberWallet) {
+                await memberWallet.update({
+                  Credits: memberWallet.Credits! + Math.round(transaction!.Credits! * 0.75),
+                  Points: memberWallet.Points! + Math.round(transaction!.Points! * 0.75),
+                });
+              }
+
+              await transaction!.destroy();
+              await item!.destroy();
+
+              Int32Proxy.Serialize(outputStream, BuyItemResult.OK);
+            }
+          }
         }
-
-        const publicProfile = await PublicProfile.findOne({ where: { Cmid: steamMember.Cmid } });
-
-        if (!publicProfile) {
-          Int32Proxy.Serialize(outputStream, BuyItemResult.InvalidMember);
-          return;
-        }
-
-        const transaction = await ItemTransaction.findOne({ where: { Cmid: publicProfile.Cmid, ItemId: itemId } });
-        const item = await PlayerInventoryItem.findOne({ where: { Cmid: publicProfile.Cmid, ItemId: itemId } });
-
-        if (!transaction && !item) {
-          Int32Proxy.Serialize(outputStream, BuyItemResult.InvalidData);
-          return;
-          // eslint-disable-next-line no-else-return
-        } else if (item) {
-          // Allow removing items added by the "inventory" command
-          await PlayerInventoryItem.destroy({
-            where: {
-              Cmid: publicProfile.Cmid,
-              ItemId: itemId,
-            },
-          });
-
-          Int32Proxy.Serialize(outputStream, BuyItemResult.OK);
-          return;
-        }
-
-        const memberWallet = await MemberWallet.findOne({ where: { Cmid: publicProfile.Cmid } });
-        if (memberWallet) {
-          await memberWallet.update({
-            Credits: memberWallet.Credits! + Math.round(transaction!.Credits! * 0.75),
-            Points: memberWallet.Points! + Math.round(transaction!.Points! * 0.75),
-          });
-        }
-
-        await transaction!.destroy();
-        await item!.destroy();
-
-        Int32Proxy.Serialize(outputStream, BuyItemResult.OK);
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('RemoveItemFromInventory', error);
     }
+
+    return null;
   }
 
   private static filterLoadout<T extends LoadoutView | PlayerLoadout>(loadoutView: T, playerInventory: PlayerInventoryItem[]): T {

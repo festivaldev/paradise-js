@@ -1,9 +1,9 @@
+import { PrivateMessage, PublicProfile } from '@/models';
+import { ApiVersion } from '@/utils';
 import { MessageThreadView, PrivateMessageView } from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
 import {
   BooleanProxy, Int32Proxy, ListProxy, MessageThreadViewProxy, PrivateMessageViewProxy, StringProxy,
 } from '@festivaldev/uberstrike-js/UberStrike/Core/Serialization';
-import { PrivateMessage, PublicProfile } from '@/models';
-import { ApiVersion } from '@/utils';
 import { Op } from 'sequelize';
 import BaseWebService from './BaseWebService';
 
@@ -12,7 +12,10 @@ export default class PrivateMessageWebService extends BaseWebService {
   public static get ServiceVersion(): string { return ApiVersion.Current; }
   protected static get ServiceInterface(): string { return 'IPrivateMessageWebServiceContract'; }
 
-  static async DeleteThread(bytes: byte[], outputStream: byte[]) {
+  static async DeleteThread(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
       const otherCmid = Int32Proxy.Deserialize(bytes);
@@ -47,12 +50,21 @@ export default class PrivateMessageWebService extends BaseWebService {
           BooleanProxy.Serialize(outputStream, true);
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('DeleteThread', error);
     }
+
+    return null;
   }
 
-  static async GetAllMessageThreadsForUser(bytes: byte[], outputStream: byte[]) {
+  static async GetAllMessageThreadsForUser(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
       const pageNumber = Int32Proxy.Deserialize(bytes);
@@ -109,12 +121,21 @@ export default class PrivateMessageWebService extends BaseWebService {
           ListProxy.Serialize<MessageThreadView>(outputStream, threads, MessageThreadViewProxy.Serialize);
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('GetAllMessageThreadsForUser', error);
     }
+
+    return null;
   }
 
-  static async GetMessageWithIdForCmid(bytes: byte[], outputStream: byte[]) {
+  static async GetMessageWithIdForCmid(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
       const messageId = Int32Proxy.Deserialize(bytes);
@@ -144,12 +165,21 @@ export default class PrivateMessageWebService extends BaseWebService {
           }
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('GetMessageWithIdForCmid', error);
     }
+
+    return null;
   }
 
-  static async GetThreadMessages(bytes: byte[], outputStream: byte[]) {
+  static async GetThreadMessages(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
       const otherCmid = Int32Proxy.Deserialize(bytes);
@@ -179,12 +209,21 @@ export default class PrivateMessageWebService extends BaseWebService {
           ListProxy.Serialize<PrivateMessageView>(outputStream, messages as PrivateMessageView[], PrivateMessageViewProxy.Serialize);
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('GetThreadMessages', error);
     }
+
+    return null;
   }
 
-  static async MarkThreadAsRead(bytes: byte[], outputStream: byte[]) {
+  static async MarkThreadAsRead(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
       const otherCmid = Int32Proxy.Deserialize(bytes);
@@ -213,12 +252,21 @@ export default class PrivateMessageWebService extends BaseWebService {
           BooleanProxy.Serialize(outputStream, true);
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('MarkThreadAsRead', error);
     }
+
+    return null;
   }
 
-  static async SendMessage(bytes: byte[], outputStream: byte[]) {
+  static async SendMessage(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
+    const isEncrypted = this.isEncrypted(data);
+    const bytes = isEncrypted ? this.CryptoPolicy.RijndaelDecrypt(data, this.EncryptionPassPhrase, this.EncryptionInitVector) : data;
+
     try {
       const authToken = StringProxy.Deserialize(bytes);
       const receiverCmid = Int32Proxy.Deserialize(bytes);
@@ -249,8 +297,14 @@ export default class PrivateMessageWebService extends BaseWebService {
           }
         }
       }
+
+      return isEncrypted
+        ? this.CryptoPolicy.RijndaelEncrypt(outputStream, this.EncryptionPassPhrase, this.EncryptionInitVector)
+        : outputStream;
     } catch (error) {
       this.handleEndpointError('SendMessage', error);
     }
+
+    return null;
   }
 }
