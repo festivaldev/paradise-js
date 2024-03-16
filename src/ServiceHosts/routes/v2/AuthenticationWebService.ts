@@ -1,3 +1,4 @@
+import { ProfanityFilter } from '@/ProfanityFilter';
 import {
   Clan, ClanMember, CurrencyDeposit, ItemTransaction, MemberWallet, ModerationAction, PlayerInventoryItem, PlayerLoadout, PlayerStatistics, PublicProfile, SteamMember,
 } from '@/models';
@@ -20,10 +21,10 @@ import BaseWebService from './BaseWebService';
 
 export default class AuthenticationWebService extends BaseWebService {
   public static get ServiceName(): string { return 'AuthenticationWebService'; }
-
   public static get ServiceVersion(): string { return ApiVersion.Current; }
-
   protected static get ServiceInterface(): string { return 'IAuthenticationWebServiceContract'; }
+
+  private static readonly ProfanityFilter: ProfanityFilter = new ProfanityFilter();
 
   static async CompleteAccount(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
     const isEncrypted = this.isEncrypted(data);
@@ -56,7 +57,7 @@ export default class AuthenticationWebService extends BaseWebService {
         AccountCompletionResultViewProxy.Serialize(outputStream, new AccountCompletionResultView({
           Result: AccountCompletionResult.InvalidName,
         }));
-      } else if (/* ProfanityFilter.DetectAllProfanities(name).Count > 0 */ false) {
+      } else if (this.ProfanityFilter.DetectAllProfanities(name).length > 0) {
         AccountCompletionResultViewProxy.Serialize(outputStream, new AccountCompletionResultView({
           Result: AccountCompletionResult.InvalidName,
         }));

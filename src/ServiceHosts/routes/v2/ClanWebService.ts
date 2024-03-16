@@ -1,3 +1,4 @@
+import { ProfanityFilter } from '@/ProfanityFilter';
 import {
   Clan, ClanMember, ContactRequest, GroupInvitation, PlayerInventoryItem, PlayerStatistics, PublicProfile,
 } from '@/models';
@@ -32,10 +33,10 @@ enum ClanActionResultCode {
 
 export default class ClanWebService extends BaseWebService {
   public static get ServiceName(): string { return 'ClanWebService'; }
-
   public static get ServiceVersion(): string { return ApiVersion.Current; }
-
   protected static get ServiceInterface(): string { return 'IClanWebServiceContract'; }
+
+  private static readonly ProfanityFilter: ProfanityFilter = new ProfanityFilter();
 
   static async AcceptClanInvitation(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
     const isEncrypted = this.isEncrypted(data);
@@ -198,7 +199,7 @@ export default class ClanWebService extends BaseWebService {
             const playerStatistics = await PlayerStatistics.findOne({ where: { Cmid: steamMember.Cmid } });
             const hasClanLicense = (await PlayerInventoryItem.findOne({ where: { Cmid: steamMember.Cmid, ItemId: UberstrikeInventoryItem.ClanLicense } })) != null;
 
-            if (createClanData.Name.length < 3 || !createClanData.Name.match(/^[a-zA-Z0-9_]+$/) /* || ProfanityFilter.DetectAllProfanities(createClanData.Name).Count > 0 */) {
+            if (createClanData.Name.length < 3 || !createClanData.Name.match(/^[a-zA-Z0-9_]+$/) || this.ProfanityFilter.DetectAllProfanities(createClanData.Name).length > 0) {
               // "Invalid Clan Name", "The name '" + name + "' is not valid, please modify it."
 
               ClanCreationReturnViewProxy.Serialize(outputStream, new ClanCreationReturnView({
@@ -210,18 +211,18 @@ export default class ClanWebService extends BaseWebService {
               ClanCreationReturnViewProxy.Serialize(outputStream, new ClanCreationReturnView({
                 ResultCode: ClanCreationResultCode.ClanNameTaken,
               }));
-              // } else if (ProfanityFilter.DetectAllProfanities(createClanData.Tag).Count > 0) {
-              //   // "Invalid Clan Tag", "The tag '" + tag + "' is not valid, please modify it."
+            } else if (this.ProfanityFilter.DetectAllProfanities(createClanData.Tag).length > 0) {
+              // "Invalid Clan Tag", "The tag '" + tag + "' is not valid, please modify it."
 
-              //   ClanCreationReturnViewProxy.Serialize(outputStream, new ClanCreationReturnView({
-              //     ResultCode: ClanCreationResultCode.InvalidClanTag
-              //   }));
-              // } else if (ProfanityFilter.DetectAllProfanities(createClanData.Motto).Count > 0) {
-              //   //"Invalid Clan Motto", "The motto '" + motto + "' is not valid, please modify it."
+              ClanCreationReturnViewProxy.Serialize(outputStream, new ClanCreationReturnView({
+                ResultCode: ClanCreationResultCode.InvalidClanTag,
+              }));
+            } else if (this.ProfanityFilter.DetectAllProfanities(createClanData.Motto).length > 0) {
+              // "Invalid Clan Motto", "The motto '" + motto + "' is not valid, please modify it."
 
-              //   ClanCreationReturnViewProxy.Serialize(outputStream, new ClanCreationReturnView({
-              //     ResultCode: ClanCreationResultCode.InvalidClanMotto
-              //   }));
+              ClanCreationReturnViewProxy.Serialize(outputStream, new ClanCreationReturnView({
+                ResultCode: ClanCreationResultCode.InvalidClanMotto,
+              }));
             } else if (await Clan.findOne({ where: { Tag: createClanData.Tag } }) != null) {
               // "Clan Tag", "The tag '" + tag + "' is already taken, try another one."
 

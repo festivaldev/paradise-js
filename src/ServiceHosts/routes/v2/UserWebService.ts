@@ -1,3 +1,4 @@
+import { ProfanityFilter } from '@/ProfanityFilter';
 import {
   CurrencyDeposit, ItemTransaction, MemberWallet, PlayerInventoryItem, PlayerLoadout, PlayerStatistics, PointDeposit, PublicProfile,
 } from '@/models';
@@ -21,6 +22,8 @@ export default class UserWebService extends BaseWebService {
   public static get ServiceName(): string { return 'UserWebService'; }
   public static get ServiceVersion(): string { return ApiVersion.Current; }
   protected static get ServiceInterface(): string { return 'IUserWebServiceContract'; }
+
+  private static readonly ProfanityFilter: ProfanityFilter = new ProfanityFilter();
 
   static async ChangeMemberName(data: byte[], outputStream: byte[]): Promise<byte[] | null> {
     const isEncrypted = this.isEncrypted(data);
@@ -49,7 +52,7 @@ export default class UserWebService extends BaseWebService {
             EnumProxy.Serialize<MemberOperationResult>(outputStream, MemberOperationResult.DuplicateName);
           } else if (name.length < 3 || !name.match(/^[a-zA-Z0-9_]+$/)) {
             EnumProxy.Serialize<MemberOperationResult>(outputStream, MemberOperationResult.InvalidName);
-          } else if (/* ProfanityFilter.DetectAllProfanities(name).Count > 0 */ false) {
+          } else if (this.ProfanityFilter.DetectAllProfanities(name).length > 0) {
             EnumProxy.Serialize<MemberOperationResult>(outputStream, MemberOperationResult.OffensiveName);
           } else {
             await publicProfile!.update({
