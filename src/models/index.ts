@@ -1,9 +1,11 @@
+import ActivePlayer from './ActivePlayer';
 import ApplicationConfiguration from './ApplicationConfiguration';
 import Clan from './Clan';
 import ClanMember from './ClanMember';
 import ContactRequest from './ContactRequest';
 import CurrencyDeposit from './CurrencyDeposit';
 import DiscordUser from './DiscordUser';
+import GameRoom from './GameRoom';
 import GameSession from './GameSession';
 import GroupInvitation from './GroupInvitation';
 import ItemTransaction from './ItemTransaction';
@@ -27,12 +29,14 @@ import ShopQuickItem from './ShopQuickItem';
 import ShopWeaponItem from './ShopWeaponItem';
 import SteamMember from './SteamMember';
 
+export { default as ActivePlayer } from './ActivePlayer';
 export { default as ApplicationConfiguration } from './ApplicationConfiguration';
 export { default as Clan } from './Clan';
 export { default as ClanMember } from './ClanMember';
 export { default as ContactRequest } from './ContactRequest';
 export { default as CurrencyDeposit } from './CurrencyDeposit';
 export { default as DiscordUser } from './DiscordUser';
+export { default as GameRoom } from './GameRoom';
 export { default as GameSession } from './GameSession';
 export { default as GroupInvitation } from './GroupInvitation';
 export { default as ItemTransaction } from './ItemTransaction';
@@ -57,12 +61,14 @@ export { default as ShopWeaponItem } from './ShopWeaponItem';
 export { default as SteamMember } from './SteamMember';
 
 export default {
+  ActivePlayer,
   ApplicationConfiguration,
   Clan,
   ClanMember,
   ContactRequest,
   CurrencyDeposit,
   DiscordUser,
+  GameRoom,
   GameSession,
   GroupInvitation,
   ItemTransaction,
