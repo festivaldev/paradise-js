@@ -10,6 +10,7 @@ export enum ServerType {
 export class WebSocketInfo {
   public SocketId: string;
   public Type: ServerType;
+  public PhotonId: number;
   public IsClient: boolean;
 
   constructor(params: any = {}) {
