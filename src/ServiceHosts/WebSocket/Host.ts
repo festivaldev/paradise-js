@@ -7,7 +7,7 @@ import {
 import { v4 as uuid } from 'uuid';
 import { WebSocketServer } from 'ws';
 import WebSocketConnection from './Connection';
-import { WebSocketDataReceivedEventArgs } from './EventArgs';
+import { WebSocketDataReceivedEventArgs, WebSocketPacketReceivedEventArgs } from './EventArgs';
 import PacketType from './PacketType';
 import WebSocketPayload from './Payload';
 import RijndaelCryptoProvider from './RijndaelCryptoProvider';
@@ -108,6 +108,11 @@ export default class WebSocketHost extends EventEmitter {
               break;
             default: break;
           }
+
+          this.emit('PacketReceived', new WebSocketPacketReceivedEventArgs({
+            Socket: socketClient,
+            PacketType: packetType,
+          }));
         } else { // JSON Object
           const [payload, payloadObj] = WebSocketPayload.Decode<any>(data.toString('utf-8'), socketClient.CryptoProvider);
 
@@ -117,8 +122,8 @@ export default class WebSocketHost extends EventEmitter {
             case PacketType.ClientInfo: {
               const clientInfo = payload! as WebSocketInfo;
 
-              socketClient.Info.SocketId = clientInfo.SocketId;
-              socketClient.Info.Type = clientInfo.Type;
+              socketClient.Info = clientInfo;
+              socketClient.Info.IsClient = true;
 
               const passphrase = ParadiseService.Instance.ServiceSettings.ServerPassPhrases.find((_) => _.Id.toLowerCase() === socketClient.Identifier.toLowerCase())?.PassPhrase.trim();
 
@@ -136,8 +141,6 @@ export default class WebSocketHost extends EventEmitter {
                   Rejected: true,
                   DisconnectReason: socketClient.DisconnectReason,
                 }), true, payloadObj.ConversationId);
-
-                client.close();
 
                 return;
               }
@@ -158,8 +161,6 @@ export default class WebSocketHost extends EventEmitter {
                       Rejected: true,
                       DisconnectReason: socketClient.DisconnectReason,
                     }), true, payloadObj.ConversationId);
-
-                    client.close();
 
                     return;
                   }
@@ -183,8 +184,6 @@ export default class WebSocketHost extends EventEmitter {
                       DisconnectReason: socketClient.DisconnectReason,
                     }), true, payloadObj.ConversationId);
 
-                    client.close();
-
                     return;
                   }
 
@@ -205,8 +204,6 @@ export default class WebSocketHost extends EventEmitter {
                     Rejected: true,
                     DisconnectReason: socketClient.DisconnectReason,
                   }), true, payloadObj.ConversationId);
-
-                  client.close();
 
                   return;
               }
@@ -232,14 +229,14 @@ export default class WebSocketHost extends EventEmitter {
 
               break;
             }
-            default:
-              this.emit('DataReceived', new WebSocketDataReceivedEventArgs({
-                Socket: socketClient,
-                Payload: payloadObj,
-                Data: payload,
-              }));
-              break;
+            default: break;
           }
+
+          this.emit('DataReceived', new WebSocketDataReceivedEventArgs({
+            Socket: socketClient,
+            Payload: payloadObj,
+            Data: payload,
+          }));
         }
       });
     });

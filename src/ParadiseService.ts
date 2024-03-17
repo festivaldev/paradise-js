@@ -2,11 +2,13 @@
 import { default as DefaultSettings, type ParadiseServiceSettings } from '@/ParadiseServiceSettings';
 import FileServerHost from '@/ServiceHosts/FileServerHost';
 import WebServiceHost from '@/ServiceHosts/WebServiceHost';
-import { ServerType, WebSocketHost, WebSocketPacketType } from '@/ServiceHosts/WebSocket';
+import {
+  ServerType, WebSocketDataReceivedEventArgs, WebSocketHost, WebSocketPacketReceivedEventArgs, WebSocketPacketType,
+} from '@/ServiceHosts/WebSocket';
 import PacketType from '@/ServiceHosts/WebSocket/PacketType';
 import { CommandHandler, Commands, ConsoleHelper } from '@/console';
 import DiscordClient from '@/discord/DiscordClient';
-import models from '@/models';
+import models, { PhotonServer } from '@/models';
 import { GameSessionManager, Log, XpPointsUtil } from '@/utils';
 import readline, { Interface } from 'readline';
 import { Dialect, Sequelize } from 'sequelize';
@@ -56,10 +58,29 @@ export default class ParadiseService {
       Log.info(`[Socket] ${ServerType[e.Socket.Type]}Server(${e.Socket.Identifier}) disconnected. Reason: ${e.Reason ?? 'Connection closed'}`);
     });
 
-    this.socketHost.on('DataReceived', async (e) => {
+    this.socketHost.on('PacketReceived', async (e: WebSocketPacketReceivedEventArgs) => {
+      switch (e.PacketType) {
+        case WebSocketPacketType.Pong:
+          try {
+            await PhotonServer.update({
+              LastResponseTime: e.Socket.LastResponseTime,
+            }, {
+              where: {
+                PhotonId: e.Socket.Info.PhotonId,
+              },
+            });
+          } catch (error) {
+            Log.error(`Failed to update LastResponseTime for Photon server with id ${e.Socket.Info.PhotonId}: No database entry`);
+          }
+
+          break;
+        default: break;
+      }
+    });
+
+    this.socketHost.on('DataReceived', async (e: WebSocketDataReceivedEventArgs) => {
       switch (e.Type) {
         case WebSocketPacketType.Monitoring:
-          console.log(e.Data);
           break;
         case WebSocketPacketType.Error:
           await this.discordClient.LogError(e.Data);

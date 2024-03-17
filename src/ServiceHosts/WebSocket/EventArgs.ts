@@ -1,4 +1,5 @@
 import { type WebSocket } from 'ws';
+import WebSocketConnection from './Connection';
 import WebSocketPacketType from './PacketType';
 import WebSocketPayload from './Payload';
 import { WebSocketInfo } from './WebSocket';
@@ -23,7 +24,7 @@ export class WebSocketDisconnectedEventArgs {
 }
 
 export class WebSocketDataReceivedEventArgs {
-  public Socket: WebSocket;
+  public Socket: WebSocketConnection;
   public BytesReceived: number;
 
   public Payload: WebSocketPayload;
@@ -35,6 +36,15 @@ export class WebSocketDataReceivedEventArgs {
 
   public get Type(): WebSocketPacketType {
     return this.Payload.Type;
+  }
+}
+
+export class WebSocketPacketReceivedEventArgs {
+  public Socket: WebSocketConnection;
+  public PacketType: WebSocketPacketType;
+
+  constructor(params: any = {}) {
+    Object.keys(params).filter((key) => key in this).forEach((key) => { this[key] = params[key]; });
   }
 }
 
