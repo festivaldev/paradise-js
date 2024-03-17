@@ -32,7 +32,9 @@ export default class DiscordClient {
   private errorLogClient?: WebhookClient;
 
   public async Connect(): Promise<void> {
-    if (this.discordClient || !ParadiseService.Instance.ServiceSettings.DiscordSettings.Enabled) return;
+    if (this.discordClient) return;
+    Log.info('Connecting to Discord...');
+
     this.discordSettings = ParadiseService.Instance.ServiceSettings.DiscordSettings;
 
     this.discordClient = new Client({
@@ -337,6 +339,7 @@ export default class DiscordClient {
 
   // #region Callbacks
   private async OnReady(readyClient: Client<boolean>): Promise<void> {
+    Log.info(`Connected to Discord as ${readyClient.user?.tag}`);
     await readyClient.user!.setPresence({
       activities: [{
         name: 'Paradise Web Services TEST',

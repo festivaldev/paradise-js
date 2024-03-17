@@ -42,8 +42,10 @@ export default class ParadiseService {
     this.webServiceHost = new WebServiceHost(+this.ServiceSettings.WebServicePort!);
     await this.webServiceHost.start();
 
-    this.discordClient = new DiscordClient();
-    await this.discordClient.Connect();
+    if (this.ServiceSettings.DiscordSettings.Enabled) {
+      this.discordClient = new DiscordClient();
+      await this.discordClient.Connect();
+    }
 
     this.socketHost = new WebSocketHost(+this.ServiceSettings.SocketPort!);
     this.socketHost.on('ConnectionRejected', (e) => {
@@ -159,9 +161,9 @@ export default class ParadiseService {
   public async Teardown(): Promise<void> {
     this.runApp = false;
 
-    await this.fileServer.stop();
-    await this.webServiceHost.stop();
-    await this.discordClient.Disconnect();
+    await this.fileServer?.stop();
+    await this.webServiceHost?.stop();
+    await this.discordClient?.Disconnect();
 
     console.log('Bye.');
     setTimeout(() => {
