@@ -11,7 +11,9 @@ import DiscordClient from '@/discord/DiscordClient';
 import models, { PhotonServer } from '@/models';
 import { GameSessionManager, Log, XpPointsUtil } from '@/utils';
 import readline, { Interface } from 'readline';
-import { Dialect, Sequelize } from 'sequelize';
+import {
+  Dialect, QueryOptions, QueryOptionsWithType, QueryTypes, Sequelize,
+} from 'sequelize';
 
 export default class ParadiseService {
   // eslint-disable-next-line no-use-before-define
@@ -124,17 +126,33 @@ export default class ParadiseService {
       logging: false,
     });
 
+    sequelize.query = async function (
+      sql: string | { query: string; values: unknown[] },
+      options?: QueryOptions | QueryOptionsWithType<QueryTypes.RAW> | undefined,
+    ): Promise<any> {
+      try {
+        return await Sequelize.prototype.query.apply(this, [sql, options]);
+      } catch (err: any) {
+        Log.error(err);
+      }
+
+      return null;
+    };
+
     Log.info('Connecting to database...');
     Log.debug(`Type:${this.ServiceSettings.DatabaseSettings.Type} Database:${this.ServiceSettings.DatabaseSettings.DatabaseName} Auth:'${this.ServiceSettings.DatabaseSettings.Username}'@'${this.ServiceSettings.DatabaseSettings.Server}:${this.ServiceSettings.DatabaseSettings.Port}' (using password: ${this.ServiceSettings.DatabaseSettings.Password?.length! > 0 ? 'YES' : 'NO'})`);
     for (const [modelName, model] of Object.entries(models)) {
       model.initialize(sequelize);
-      model.sync();
     }
 
     for (const [modelName, model] of Object.entries(models)) {
       model.associate?.(models);
     }
-    Log.info('Database opened.');
+
+    try {
+      await sequelize.sync();
+      Log.info('Database opened.');
+    } catch { }
     // #endregion
 
     CommandHandler.Commands.push(...Commands);
