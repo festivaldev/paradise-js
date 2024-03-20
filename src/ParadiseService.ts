@@ -191,7 +191,7 @@ export default class ParadiseService {
 
   private Prompt(): void {
     this.stdin.question('> ', async (cmd) => {
-      const cmdArgs = cmd.split(' ');
+      const cmdArgs = cmd.match(/\w+|"(?:\\"|[^"])+"/g)?.map((_) => (_.match(/".+"/g) ? _.slice(1, -1) : _)) ?? [];
 
       switch (cmdArgs[0]?.toLocaleLowerCase()) {
         default:
