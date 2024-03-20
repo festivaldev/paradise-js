@@ -1,3 +1,5 @@
+import ParadiseService from '@/ParadiseService';
+import { ServerType } from '@/ServiceHosts/WebSocket';
 import crypto from 'crypto';
 import { v4 as uuid } from 'uuid';
 import ParadiseCommand from '../ParadiseCommand';
@@ -11,7 +13,8 @@ export default class ServerCommand extends ParadiseCommand {
 
   public override UsageText: string[] = [
     `${ServerCommand.Command}: ${this.Description}`,
-    '  generate\t\tGenerates credentials for a new server.',
+    '  list\t\t\tList all known credentials',
+    '  generate <name> <type>\tGenerates credentials for a new server.',
   ];
 
   public override async Run(args: string[]): Promise<any> {
@@ -21,13 +24,37 @@ export default class ServerCommand extends ParadiseCommand {
     }
 
     switch (args[0].toLocaleLowerCase()) {
+      case 'list':
+        for (const serverCredential of ParadiseService.Instance.ServiceSettings.ServerCredentials) {
+          this.WriteLine(`Name: ${serverCredential.Name}`);
+          this.WriteLine(`Type: ${serverCredential.Type} (${ServerType[serverCredential.Type]})`);
+          this.WriteLine(`Server ID: ${serverCredential.Id}`);
+          this.WriteLine(`Passphrase: ${serverCredential.Passphrase}\n`);
+        }
+        break;
       case 'gen':
       case 'generate': {
+        const serverName = args[1];
+
+        if (serverName.length < 3) {
+          this.WriteLine('Server name must contain at least 3 characters.');
+          return;
+        }
+
+        const serverType: ServerType = parseInt(args[2], 10) as ServerType;
+
+        if (!ServerType[serverType] || serverType < 2) {
+          this.WriteLine('Invalid server type.');
+          return;
+        }
+
         const serverId = uuid();
         const passphrase = crypto.createHash('SHA512').update(`${serverId}_${new Date().getTime()}`).digest('base64');
 
-        this.WriteLine(`Server ID: ${serverId}`);
-        this.WriteLine(`Passphrase: ${passphrase}`);
+        this.WriteLine(`- Name: '${serverName}'`);
+        this.WriteLine(`  Type: ${serverType} # ${ServerType[serverType]}`);
+        this.WriteLine(`  Id: ${serverId}`);
+        this.WriteLine(`  Passphrase: ${passphrase}`);
 
         break;
       }
