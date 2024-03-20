@@ -3,10 +3,13 @@ import { Log } from '@/utils';
 import fs from 'fs';
 import path from 'path';
 import YAML from 'yaml';
+import { ServerType } from './ServiceHosts/WebSocket';
 
 export class ServerPassPhrase {
+  public Name: string;
+  public Type: ServerType;
   public Id: string;
-  public PassPhrase: string;
+  public Passphrase: string;
 }
 
 export class DatabaseSettings {
@@ -31,7 +34,7 @@ export class ParadiseServiceSettings {
   public WebServiceSuffix: string = 'Contract.svc';
   public EncryptionInitVector: string = 'aaaaBBBBccccDDDD'; // Must be 16 characters
   public EncryptionPassPhrase: string = 'mysupersecretpassphrase';
-  public ServerPassPhrases: ServerPassPhrase[] = [];
+  public ServerCredentials: ServerPassPhrase[] = [];
 
   public FileServerRoot: string = 'wwwroot';
 

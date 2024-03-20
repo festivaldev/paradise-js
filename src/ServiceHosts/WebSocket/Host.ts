@@ -125,7 +125,7 @@ export default class WebSocketHost extends EventEmitter {
               socketClient.Info = clientInfo;
               socketClient.Info.IsClient = true;
 
-              const passphrase = ParadiseService.Instance.ServiceSettings.ServerPassPhrases.find((_) => _.Id.toLowerCase() === socketClient.Identifier.toLowerCase())?.PassPhrase.trim();
+              const passphrase = ParadiseService.Instance.ServiceSettings.ServerCredentials.find((_) => _.Id.toLowerCase() === socketClient.Identifier.toLowerCase())?.Passphrase.trim();
 
               if (!passphrase || !passphrase.length) {
                 socketClient.DisconnectReason = 'Unknown server';
