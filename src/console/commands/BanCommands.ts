@@ -1,6 +1,6 @@
-import { MemberAccessLevel } from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
 import { ModerationAction, PublicProfile } from '@/models';
 import { ModerationFlag } from '@/utils';
+import { MemberAccessLevel } from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
 import moment from 'moment';
 import { Op } from 'sequelize';
 import ParadiseCommand from '../ParadiseCommand';
@@ -14,7 +14,8 @@ export class BanCommand extends ParadiseCommand {
 
   public override UsageText: string[] = [
     `${BanCommand.Command}: ${this.Description}`,
-    `Usage: ${BanCommand.Command} <name> <duration> <reason>`,
+    `Usage: ${BanCommand.Command} <name> <reason> [duration]`,
+    '\nTo specify a multi-word reason, embed the \'reason\' parameter\nin quotation marks (eg. "very obvious reason")',
   ];
 
   public override MinimumAccessLevel: MemberAccessLevel = MemberAccessLevel.Moderator;
@@ -39,11 +40,8 @@ export class BanCommand extends ParadiseCommand {
       return;
     }
 
-    const duration = Number(args[1]);
-    if (Number.isNaN(duration)) {
-      this.WriteLine('Invalid parameter: duration');
-      return;
-    }
+    const reason = args[1];
+    const duration = Number(args[2]);
 
     if (await ModerationAction.findOne({
       where: {
@@ -58,8 +56,6 @@ export class BanCommand extends ParadiseCommand {
       return;
     }
 
-    const reason = args.slice(2).join(' ');
-
     await ModerationAction.create({
       ModerationFlag: ModerationFlag.Banned,
       SourceCmid: 0,
@@ -67,7 +63,7 @@ export class BanCommand extends ParadiseCommand {
       TargetCmid: publicProfile.Cmid,
       TargetName: publicProfile.Name,
       ActionDate: new Date(),
-      ExpireTime: duration === 0 ? new Date('9999-12-31T23:59:59.999Z') : moment(new Date()).add(duration, 'minutes').toDate(),
+      ExpireTime: (Number.isNaN(duration) || duration === 0) ? new Date('9999-12-31T23:59:59.999Z') : moment(new Date()).add(duration, 'minutes').toDate(),
       Reason: reason,
     });
 
