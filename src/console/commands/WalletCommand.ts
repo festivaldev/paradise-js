@@ -1,6 +1,6 @@
+import { MemberWallet, PublicProfile } from '@/models';
 import { MemberAccessLevel } from '@festivaldev/uberstrike-js/Cmune/DataCenter/Common/Entities';
 import ParadiseCommand from '../ParadiseCommand';
-import { MemberWallet, PublicProfile } from '@/models';
 
 export default class WalletCommand extends ParadiseCommand {
   public static override Command: string = 'wallet';
@@ -42,7 +42,19 @@ export default class WalletCommand extends ParadiseCommand {
 
         // console.log(profiles)
 
-        if (profiles.length) {
+        if (!profiles) {
+          this.WriteLine('Failed to get user profiles.');
+        } else if (!profiles.length) {
+          this.WriteLine('No user profiles found.');
+        }
+
+        if (!wallets) {
+          this.WriteLine('Failed to get user wallets.');
+        } else if (!wallets.length) {
+          this.WriteLine('No user wallets found.');
+        }
+
+        if (profiles?.length && wallets?.length) {
           this.WriteLine(' ----------------------------------------------------- ');
           this.WriteLine(`| ${'Username'.padEnd(18)} | ${'CMID'.padEnd(10)} | ${'Credits'.padEnd(7)} | ${'Points'.padEnd(7)} |`);
           this.WriteLine(' -----------------------------------------------------|');
